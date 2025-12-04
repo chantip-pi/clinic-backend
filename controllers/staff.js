@@ -2,10 +2,11 @@ const {
   getStaff,
   getStaffById,
   getStaffByUsername,
+  loginStaff,
   createStaff,
   updateStaff,
   deleteStaff
-} = require('../models');
+} = require('../models/staff');
 
 const handleError = (res, error) => {
   console.error(error);
@@ -78,10 +79,19 @@ const removeStaff = async (req, res) => {
   }
 };
 
+const loginStaffHandler = async (req, res) => {
+  try {
+    const staff = await loginStaff(req.params.username, req.params.password);
+    res.json(staff);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
 module.exports = {
   listStaff,
   getStaffById: getStaffByIdHandler,
   getStaffByUsername: getStaffByUsernameHandler,
+  loginStaff: loginStaffHandler,
   addStaff,
   editStaff,
   removeStaff

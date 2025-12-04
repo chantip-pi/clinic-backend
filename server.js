@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { logger, errorHandler } = require('./middleware');
 const { connectDB } = require('./config/database');
-const routes = require('./routes');
+const routes = require('./routes/staff');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
