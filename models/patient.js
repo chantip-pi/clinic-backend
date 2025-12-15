@@ -6,9 +6,7 @@ const mapPatient = (row) => ({
   phoneNumber: row.phone_number,
   birthday: row.birthday,
   gender: row.gender,
-  appointmentDate: row.appointment_date,
-  courseCount: row.course_count,
-  firstVistDate: row.first_visit_date
+  remainingCourse: row.remaining_course,
 });
 
 const getPatients = async () => {
@@ -18,29 +16,23 @@ const getPatients = async () => {
             phone_number,
             birthday,
             gender,
-            appointment_date,
-            course_count,
-            first_visit_date
+            remaining_course
      FROM patients
      ORDER BY patient_id DESC`
   );
   return rows.map(mapPatient);
 };
 
-const getPatientsByAppointmentDate = async (appointmentDate) => {
+const getPatientsByAppointmentDate = async () => {
   const { rows } = await pool.query(
     `SELECT patient_id,
             name_surname,
             phone_number,
             birthday,
             gender,
-            appointment_date,
-            course_count,
-            first_visit_date
+            remaining_course
      FROM patients
-     WHERE appointment_date = $1
-     ORDER BY patient_id DESC`,
-    [appointmentDate]
+     ORDER BY patient_id DESC`
   );
   return rows.map(mapPatient);
 };
@@ -52,9 +44,7 @@ const getPatientById = async (patientId) => {
             phone_number,
             birthday,
             gender,
-            appointment_date,
-            course_count,
-            first_visit_date
+            remaining_course
      FROM patients
      WHERE patient_id = $1`,
     [patientId]
@@ -67,9 +57,7 @@ const createPatient = async ({
   phoneNumber,
   birthday,
   gender,
-  appointmentDate,
-  courseCount,
-  firstVistDate
+  remainingCourse,
 }) => {
   const { rows } = await pool.query(
     `INSERT INTO patients (
@@ -77,20 +65,16 @@ const createPatient = async ({
        phone_number,
        birthday,
        gender,
-       appointment_date,
-       course_count,
-       first_visit_date
+       remaining_course
      )
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING patient_id,
                name_surname,
                phone_number,
                birthday,
                gender,
-               appointment_date,
-               course_count,
-               first_visit_date`,
-    [nameSurname, phoneNumber, birthday, gender, appointmentDate, courseCount, firstVistDate]
+               remaining_course`,
+    [nameSurname, phoneNumber, birthday, gender, remainingCourse]
   );
   return mapPatient(rows[0]);
 };
@@ -102,9 +86,7 @@ const updatePatient = async (
     phoneNumber,
     birthday,
     gender,
-    appointmentDate,
-    courseCount,
-    firstVistDate
+    remainingCourse,
   }
 ) => {
   const { rows } = await pool.query(
@@ -113,26 +95,20 @@ const updatePatient = async (
          phone_number = $2,
          birthday = $3,
          gender = $4,
-         appointment_date = $5,
-         course_count = $6,
-         first_visit_date = $7
-     WHERE patient_id = $8
+         remaining_course = $5
+     WHERE patient_id = $6
      RETURNING patient_id,
                name_surname,
                phone_number,
                birthday,
                gender,
-               appointment_date,
-               course_count,
-               first_visit_date`,
+               remaining_course`,
     [
       nameSurname,
       phoneNumber,
       birthday,
       gender,
-      appointmentDate,
-      courseCount,
-      firstVistDate,
+      remainingCourse,
       patientId
     ]
   );

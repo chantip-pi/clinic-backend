@@ -9,6 +9,7 @@ const {
   removeStaff
 } = require('../controllers/staff');
 const patientRoutes = require('./patient');
+const appointmentRoutes = require('./appointment');
 
 const router = express.Router();
 
@@ -23,5 +24,8 @@ router.delete('/staff/:staffId', removeStaff);
 
 // Patient routes (separate module)
 router.use('/', patientRoutes);
+
+// Appointment routes (separate module)
+router.use('/', appointmentRoutes);
 
 module.exports = router;
