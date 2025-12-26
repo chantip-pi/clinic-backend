@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { logger, errorHandler } = require('./middleware');
 const routes = require('./routes/staff');
+const geminiRoutes = require('./routes/gemini');
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api', routes);
+app.use('/api/gemini', geminiRoutes);
 app.use(errorHandler);
 
 module.exports = app;
