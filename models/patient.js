@@ -111,8 +111,8 @@ const updatePatient = async (
          phone_number = $2,
          birthday = $3,
          gender = $4,
-         remaining_course = $5
-         congenital_disease = $6
+         remaining_course = $5,
+         congenital_disease = $6,
          surgery_history = $7
      WHERE patient_id = $8
      RETURNING patient_id,
@@ -131,9 +131,10 @@ const updatePatient = async (
       remainingCourse,
       congenitalDisease,
       surgeryHistory,
-      patientId
+      patientId,
     ]
   );
+
   return rows[0] ? mapPatient(rows[0]) : null;
 };
 
