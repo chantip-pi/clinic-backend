@@ -3,24 +3,29 @@ const { pool } = require('../config/database');
 const mapAppointment = (row) => ({
   appointmentId: row.appointment_id,
   patientId: row.patient_id,
+  doctorId: row.doctor_id,
   appointmentDateTime: row.appointment_date_time,
   status: row.status,
   reason: row.reason,
   createdAt: row.created_at,
-  patientName: row.patient_name
+  patientName: row.patient_name,
+  doctorName: row.doctor_name
 });
 
 const getAppointments = async () => {
   const { rows } = await pool.query(
     `SELECT a.appointment_id,
             a.patient_id,
+            a.doctor_id,
             a.appointment_date_time,
             a.status,
             a.reason,
             a.created_at,
-            p.name_surname AS patient_name
+            p.name_surname AS patient_name,
+            s.name_surname AS doctor_name
      FROM appointments a
      LEFT JOIN patients p ON p.patient_id = a.patient_id
+     LEFT JOIN staffs s ON s.staff_id = a.doctor_id
      ORDER BY a.appointment_date_time DESC`
   );
   return rows.map(mapAppointment);
@@ -30,13 +35,16 @@ const getAppointmentById = async (appointmentId) => {
   const { rows } = await pool.query(
     `SELECT a.appointment_id,
             a.patient_id,
+            a.doctor_id,
             a.appointment_date_time,
             a.status,
             a.reason,
             a.created_at,
-            p.name_surname AS patient_name
+            p.name_surname AS patient_name,
+            s.name_surname AS doctor_name
      FROM appointments a
      LEFT JOIN patients p ON p.patient_id = a.patient_id
+     LEFT JOIN staffs s ON s.staff_id = a.doctor_id
      WHERE a.appointment_id = $1`,
     [appointmentId]
   );
@@ -47,13 +55,16 @@ const getAppointmentsByPatientId = async (patientId) => {
   const { rows } = await pool.query(
     `SELECT a.appointment_id,
             a.patient_id,
+            a.doctor_id,
             a.appointment_date_time,
             a.status,
             a.reason,
             a.created_at,
-            p.name_surname AS patient_name
+            p.name_surname AS patient_name,
+            s.name_surname AS doctor_name
      FROM appointments a
      LEFT JOIN patients p ON p.patient_id = a.patient_id
+     LEFT JOIN staffs s ON s.staff_id = a.doctor_id
      WHERE a.patient_id = $1
      ORDER BY a.appointment_date_time DESC`,
     [patientId]
@@ -64,17 +75,43 @@ const getAppointmentsByPatientId = async (patientId) => {
 const getAppointmentsByDate = async (appointmentDate) => {
   const { rows } = await pool.query(
     `SELECT a.appointment_id,
-            a.patient_id,
+            a.patient_id, 
+            a.doctor_id,
             a.appointment_date_time,
             a.status,
             a.reason,
             a.created_at,
-            p.name_surname AS patient_name
+            p.name_surname AS patient_name,
+            s.name_surname AS doctor_name
      FROM appointments a
      LEFT JOIN patients p ON p.patient_id = a.patient_id
+     LEFT JOIN staffs s ON s.staff_id = a.doctor_id
      WHERE DATE(a.appointment_date_time) = $1
      ORDER BY a.appointment_date_time DESC`,
     [appointmentDate]
+  );
+  return rows.map(mapAppointment);
+};
+
+const getAppointmentsByDoctorId = async (doctorId) => {
+
+  const { rows } = await pool.query(
+    `SELECT a.appointment_id,
+            a.patient_id,
+            a.doctor_id,
+            a.appointment_date_time,
+            a.status,
+            a.reason,
+            a.created_at,
+            p.name_surname AS patient_name,
+            s.name_surname AS doctor_name
+     FROM appointments a
+     LEFT JOIN patients p ON p.patient_id = a.patient_id
+     LEFT JOIN staffs s ON s.staff_id = a.doctor_id
+     WHERE a.doctor_id = $1
+     AND a.status = "scheduled"
+     ORDER BY a.appointment_date_time DESC`,
+    [doctorId]
   );
   return rows.map(mapAppointment);
 };
@@ -94,6 +131,7 @@ const getUpcomingAppointmentDate = async (patientId) => {
 
 const createAppointment = async ({
   patientId,
+  doctorId,
   appointmentDateTime,
   status,
   reason
@@ -101,19 +139,22 @@ const createAppointment = async ({
   const { rows } = await pool.query(
     `INSERT INTO appointments (
        patient_id,
+       doctor_id,
        appointment_date_time,
        status,
        reason
      )
-     VALUES ($1, $2, $3, $4)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING appointment_id,
                patient_id,
+               doctor_id,
                appointment_date_time,
                status,
                reason,
                created_at,
-               (SELECT name_surname FROM patients p WHERE p.patient_id = $1) AS patient_name`,
-    [patientId, appointmentDateTime, status, reason]
+               (SELECT name_surname FROM patients p WHERE p.patient_id = $1) AS patient_name,
+               (SELECT name_surname FROM staffs s WHERE s.staff_id = $2) AS doctor_name`,
+    [patientId, doctorId, appointmentDateTime, status, reason]
   );
   return mapAppointment(rows[0]);
 };
@@ -122,6 +163,7 @@ const updateAppointment = async (
   appointmentId,
   {
     patientId,
+    doctorId,
     appointmentDateTime,
     status,
     reason
@@ -130,18 +172,22 @@ const updateAppointment = async (
   const { rows } = await pool.query(
     `UPDATE appointments
      SET patient_id = $1,
-         appointment_date_time = $2,
-         status = $3,
-         reason = $4
-     WHERE appointment_id = $5
+         doctor_id = $2,
+         appointment_date_time = $3,
+         status = $4,
+         reason = $5,
+         updated_at = NOW()
+     WHERE appointment_id = $6
      RETURNING appointment_id,
                patient_id,
+               doctor_id,
                appointment_date_time,
                status,
                reason,
                created_at,
-               (SELECT name_surname FROM patients p WHERE p.patient_id = $1) AS patient_name`,
-    [patientId, appointmentDateTime, status, reason, appointmentId]
+               (SELECT name_surname FROM patients p WHERE p.patient_id = $1) AS patient_name,
+               (SELECT name_surname FROM staffs s WHERE s.staff_id = $2) AS doctor_name`,
+    [patientId, doctorId, appointmentDateTime, status, reason, appointmentId]
   );
   return rows[0] ? mapAppointment(rows[0]) : null;
 };
@@ -159,6 +205,7 @@ module.exports = {
   getAppointmentById,
   getAppointmentsByDate,
   getAppointmentsByPatientId,
+  getAppointmentsByDoctorId,
   getUpcomingAppointmentDate,
   createAppointment,
   updateAppointment,
