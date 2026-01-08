@@ -17,7 +17,7 @@ const isBcryptHash = (s) => typeof s === 'string' && /^\$2[aby]\$/.test(s);
 const getStaff = async () => {
   const { rows } = await pool.query(
     `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, role
-     FROM staff
+     FROM staffs
      ORDER BY staff_id DESC`
   );
   return rows.map(mapStaff);
@@ -26,7 +26,7 @@ const getStaff = async () => {
 const getStaffById = async (staffId) => {
   const { rows } = await pool.query(
     `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, role
-     FROM staff
+     FROM staffs
      WHERE staff_id = $1`,
     [staffId]
   );
@@ -36,7 +36,7 @@ const getStaffById = async (staffId) => {
 const getStaffByUsername = async (username) => {
   const { rows } = await pool.query(
     `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, role
-     FROM staff
+     FROM staffs
      WHERE username = $1`,
     [username]
   );
@@ -59,7 +59,7 @@ const createStaff = async ({
   const passwordToStore = isBcryptHash(password) ? password : await bcrypt.hash(password, 10);
 
   const { rows } = await pool.query(
-    `INSERT INTO staff (username, password, name_surname, phone_number, birthday, gender, email, role)
+    `INSERT INTO staffs (username, password, name_surname, phone_number, birthday, gender, email, role)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING staff_id, username, password, name_surname, phone_number, birthday, gender, email, role`,
     [username, passwordToStore, nameSurname, phoneNumber, birthday, gender, email, role]
@@ -75,7 +75,7 @@ const updateStaff = async (
   const passwordToStore = password ? (isBcryptHash(password) ? password : await bcrypt.hash(password, 10)) : null;
 
   const { rows } = await pool.query(
-    `UPDATE staff
+    `UPDATE staffs
      SET username = $1,
          password = COALESCE($2, password),
          name_surname = $3,
@@ -93,7 +93,7 @@ const updateStaff = async (
 };
 
 const deleteStaff = async (staffId) => {
-  const { rowCount } = await pool.query('DELETE FROM staff WHERE staff_id = $1', [staffId]);
+  const { rowCount } = await pool.query('DELETE FROM staffs WHERE staff_id = $1', [staffId]);
   return rowCount > 0;
 };
 
@@ -101,7 +101,7 @@ const loginStaff = async (username, password) => {
   // We first fetch the user by username and then verify the password.
   const { rows } = await pool.query(
     `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, role
-     FROM staff
+     FROM staffs
      WHERE username = $1`,
     [username]
   );
