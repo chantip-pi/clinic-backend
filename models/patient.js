@@ -113,7 +113,8 @@ const updatePatient = async (
          gender = $4,
          remaining_course = $5,
          congenital_disease = $6,
-         surgery_history = $7
+         surgery_history = $7,
+         updated_at = NOW()
      WHERE patient_id = $8
      RETURNING patient_id,
                name_surname,
