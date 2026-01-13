@@ -23,6 +23,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api', routes);
+app.use('/images', express.static('images'));
 app.use(errorHandler);
 
 module.exports = app;
