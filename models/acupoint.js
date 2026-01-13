@@ -5,14 +5,14 @@ const mapAcupoints = (row) => ({
   acupunctureName: row.acupuncture_name,
   region: row.region,
   side: row.side,
-  connection: row.connection,
-  top: row.top,
-  left: row.left,
+  meridian: row.meridian,
+  point_top: row.point_top,
+  point_left: row.point_left,
 });
 
 const getAcupoints = async () => {
   const { rows } = await pool.query(
-    `SELECT acupuncture_code, acupuncture_name, region, side, connection, top, left FROM acupoints ORDER BY acupuncture_code DESC`
+    `SELECT acupuncture_code, acupuncture_name, region, side, meridian, point_top, point_left FROM acupoints ORDER BY acupuncture_code DESC`
   );
   return rows.map(mapAcupoints);
 };
@@ -23,9 +23,9 @@ const getAcupointByCode = async (acupunctureCode) => {
             acupuncture_name,
             region,
             side,
-            connection,
-            top,
-            left
+            meridian,
+            point_top,
+            point_left
      FROM acupoints
      WHERE acupuncture_code = $1`,
     [acupunctureCode]
@@ -38,9 +38,9 @@ const createAcupoint = async ({
   acupuncture_name,
   region,
   side,
-  connection,
-  top,
-  left,
+  meridian,
+  point_top,
+  point_left,
 }) => {
   const { rows } = await pool.query(
     `INSERT INTO acupoints (
@@ -48,19 +48,19 @@ const createAcupoint = async ({
             acupuncture_name,
             region,
             side,
-            connection,
-            top,
-            left
+            meridian,
+            point_top,
+            point_left
      )
      VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING acupuncture_code,
             acupuncture_name,
             region,
             side,
-            connection,
-            top,
-            left`,
-    [acupuncture_code, acupuncture_name, region, side, connection, top, left]
+            meridian,
+            point_top,
+            point_left`,
+    [acupuncture_code, acupuncture_name, region, side, meridian, point_top, point_left]
   );
   return mapAcupoints(rows[0]);
 };
