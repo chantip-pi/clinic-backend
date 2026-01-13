@@ -10,6 +10,7 @@ const {
 } = require('../controllers/staff');
 const patientRoutes = require('./patient');
 const appointmentRoutes = require('./appointment');
+const acupointRoutes = require('./acupoint');
 
 const router = express.Router();
 
@@ -27,5 +28,7 @@ router.use('/', patientRoutes);
 
 // Appointment routes (separate module)
 router.use('/', appointmentRoutes);
+
+router.use('/', acupointRoutes);
 
 module.exports = router;
