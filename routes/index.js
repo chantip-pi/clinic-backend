@@ -4,6 +4,7 @@ const patientRoutes = require('./patient');
 const appointmentRoutes = require('./appointment');
 const acupointRoutes = require('./acupoint');
 const geminiRoutes = require('./gemini');
+const imageRoutes = require('./images');
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ router.use('/', patientRoutes);
 router.use('/', appointmentRoutes);
 router.use('/', acupointRoutes);
 router.use('/', geminiRoutes);
+router.use('/', imageRoutes);
 
 module.exports = router;
 
