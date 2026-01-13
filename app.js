@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { logger, errorHandler } = require('./middleware');
-const routes = require('./routes'); // combined staff, patient, appointment routes
+const routes = require('./routes');
 
 const app = express();
 
