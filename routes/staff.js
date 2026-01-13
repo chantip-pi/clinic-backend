@@ -8,9 +8,6 @@ const {
   editStaff,
   removeStaff
 } = require('../controllers/staff');
-const patientRoutes = require('./patient');
-const appointmentRoutes = require('./appointment');
-const acupointRoutes = require('./acupoint');
 
 const router = express.Router();
 
@@ -22,13 +19,5 @@ router.get('/staff/login/:username/:password', loginStaff);
 router.post('/staff', addStaff);
 router.put('/staff/:staffId', editStaff);
 router.delete('/staff/:staffId', removeStaff);
-
-// Patient routes (separate module)
-router.use('/', patientRoutes);
-
-// Appointment routes (separate module)
-router.use('/', appointmentRoutes);
-
-router.use('/', acupointRoutes);
 
 module.exports = router;
