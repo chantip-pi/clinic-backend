@@ -6,7 +6,8 @@ const {
   getUpcomingAppointmentDate,
   createAppointment,
   updateAppointment,
-  deleteAppointment
+  deleteAppointment,
+  getAppointmentsByDoctorId
 } = require('../models/appointment');
 
 const handleError = (res, error) => {
@@ -47,6 +48,14 @@ const getAppointmentsByDateHandler = async (req, res) => {
 const getAppointmentsByPatientIdHandler = async (req, res) => {
   try {
     const appointments = await getAppointmentsByPatientId(req.params.patientId);
+    res.json(appointments);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+const getAppointmentsByDoctorIdHandler = async (req, res) => {
+  try {
+    const appointments = await getAppointmentsByDoctorId(req.params.doctorId);
     res.json(appointments);
   } catch (error) {
     handleError(res, error);
@@ -100,6 +109,7 @@ module.exports = {
   getAppointmentById: getAppointmentByIdHandler,
   getAppointmentsByDate: getAppointmentsByDateHandler,
   getAppointmentsByPatientId: getAppointmentsByPatientIdHandler,
+  getAppointmentsByDoctorId: getAppointmentsByDoctorIdHandler,
   getUpcomingAppointmentDate: getUpcomingAppointmentDateHandler,
   addAppointment,
   editAppointment,

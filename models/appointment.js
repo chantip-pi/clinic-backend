@@ -12,6 +12,21 @@ const mapAppointment = (row) => ({
   doctorName: row.doctor_name
 });
 
+const mapAppointmentOutput = (row) => ({
+  appointmentId: row.appointment_id,
+  patientId: row.patient_id,
+  patientName: row.patient_name,
+  doctorId: row.doctor_id,
+  doctorName: row.doctor_name,
+  appointmentDateTime: row.appointment_date_time,
+  status: row.status,
+  reason: row.reason,
+  createdAt: row.created_at,
+  patientName: row.patient_name,
+  doctorName: row.doctor_name
+});
+
+
 const getAppointments = async () => {
   const { rows } = await pool.query(
     `SELECT a.appointment_id,
@@ -28,7 +43,7 @@ const getAppointments = async () => {
      LEFT JOIN staffs s ON s.staff_id = a.doctor_id
      ORDER BY a.appointment_date_time DESC`
   );
-  return rows.map(mapAppointment);
+  return rows.map(mapAppointmentOutput);
 };
 
 const getAppointmentById = async (appointmentId) => {
@@ -48,7 +63,7 @@ const getAppointmentById = async (appointmentId) => {
      WHERE a.appointment_id = $1`,
     [appointmentId]
   );
-  return rows[0] ? mapAppointment(rows[0]) : null;
+  return rows[0] ? mapAppointmentOutput(rows[0]) : null;
 };
 
 const getAppointmentsByPatientId = async (patientId) => {
@@ -69,7 +84,7 @@ const getAppointmentsByPatientId = async (patientId) => {
      ORDER BY a.appointment_date_time DESC`,
     [patientId]
   );
-  return rows.map(mapAppointment);
+  return rows.map(mapAppointmentOutput);
 };
 
 const getAppointmentsByDate = async (appointmentDate) => {
@@ -90,7 +105,7 @@ const getAppointmentsByDate = async (appointmentDate) => {
      ORDER BY a.appointment_date_time DESC`,
     [appointmentDate]
   );
-  return rows.map(mapAppointment);
+  return rows.map(mapAppointmentOutput);
 };
 
 const getAppointmentsByDoctorId = async (doctorId) => {
@@ -109,11 +124,11 @@ const getAppointmentsByDoctorId = async (doctorId) => {
      LEFT JOIN patients p ON p.patient_id = a.patient_id
      LEFT JOIN staffs s ON s.staff_id = a.doctor_id
      WHERE a.doctor_id = $1
-     AND a.status = "scheduled"
+     AND a.status = 'scheduled'
      ORDER BY a.appointment_date_time DESC`,
     [doctorId]
   );
-  return rows.map(mapAppointment);
+  return rows.map(mapAppointmentOutput);
 };
 
 const getUpcomingAppointmentDate = async (patientId) => {

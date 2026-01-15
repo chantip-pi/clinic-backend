@@ -4,6 +4,7 @@ const {
   getAppointmentById,
   getAppointmentsByDate,
   getAppointmentsByPatientId,
+  getAppointmentsByDoctorId,
   getUpcomingAppointmentDate,
   addAppointment,
   editAppointment,
@@ -16,6 +17,7 @@ router.get('/appointments', listAllAppointments);
 router.get('/appointments/upcoming/:patientId', getUpcomingAppointmentDate);
 router.get('/appointments/date/:appointmentDate', getAppointmentsByDate);
 router.get('/appointments/patient/:patientId', getAppointmentsByPatientId);
+router.get('/appointments/doctor/:doctorId', getAppointmentsByDoctorId);
 router.get('/appointments/:appointmentId', getAppointmentById);
 router.post('/appointments', addAppointment);
 router.put('/appointments/:appointmentId', editAppointment);
