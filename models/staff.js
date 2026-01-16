@@ -9,14 +9,19 @@ const mapStaff = (row) => ({
   birthday: row.birthday,
   gender: row.gender,
   email: row.email,
-  role: row.role
+  title: row.title
+});
+
+const mapName = (row) => ({
+  staffId: row.staff_id,
+  nameSurname: row.name_surname
 });
 
 const isBcryptHash = (s) => typeof s === 'string' && /^\$2[aby]\$/.test(s);
 
 const getStaff = async () => {
   const { rows } = await pool.query(
-    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, role
+    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title
      FROM staffs
      ORDER BY staff_id DESC`
   );
@@ -25,7 +30,7 @@ const getStaff = async () => {
 
 const getStaffById = async (staffId) => {
   const { rows } = await pool.query(
-    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, role
+    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title
      FROM staffs
      WHERE staff_id = $1`,
     [staffId]
@@ -35,7 +40,7 @@ const getStaffById = async (staffId) => {
 
 const getStaffByUsername = async (username) => {
   const { rows } = await pool.query(
-    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, role
+    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title
      FROM staffs
      WHERE username = $1`,
     [username]
@@ -43,6 +48,21 @@ const getStaffByUsername = async (username) => {
   return rows[0] ? mapStaff(rows[0]) : null;
 };
 
+const getDoctorName = async () => {
+  const { rows } = await pool.query(
+    `SELECT staff_id, name_surname
+     FROM staffs
+     WHERE title = 'Doctor'`);
+  return rows.map(mapName);
+};    
+  
+const getNurseName = async () => {
+  const { rows } = await pool.query(
+    `SELECT staff_id, name_surname
+      FROM staffs
+      WHERE title = 'Nurse'`);
+  return rows.map(mapName);
+}
 
 const createStaff = async ({
   username,
@@ -52,24 +72,24 @@ const createStaff = async ({
   birthday,
   gender,
   email,
-  role
+  title
 }) => {
   // If the client already sent a bcrypt hash we store it as-is.
   // If client sends plaintext, hash it here before storing.
   const passwordToStore = isBcryptHash(password) ? password : await bcrypt.hash(password, 10);
 
   const { rows } = await pool.query(
-    `INSERT INTO staffs (username, password, name_surname, phone_number, birthday, gender, email, role)
+    `INSERT INTO staffs (username, password, name_surname, phone_number, birthday, gender, email, title)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING staff_id, username, password, name_surname, phone_number, birthday, gender, email, role`,
-    [username, passwordToStore, nameSurname, phoneNumber, birthday, gender, email, role]
+     RETURNING staff_id, username, password, name_surname, phone_number, birthday, gender, email, title`,
+    [username, passwordToStore, nameSurname, phoneNumber, birthday, gender, email, title]
   );
   return mapStaff(rows[0]);
 };
 
 const updateStaff = async (
   staffId,
-  { username, password, nameSurname, phoneNumber, birthday, gender, email, role }
+  { username, password, nameSurname, phoneNumber, birthday, gender, email, title }
 ) => {
   // If password provided and not already a bcrypt hash, hash it.
   const passwordToStore = password ? (isBcryptHash(password) ? password : await bcrypt.hash(password, 10)) : null;
@@ -83,11 +103,11 @@ const updateStaff = async (
          birthday = $5,
          gender = $6,
          email = $7,
-         role = $8,
+         title = $8,
          updated_at = NOW()
      WHERE staff_id = $9
-     RETURNING staff_id, username, password, name_surname, phone_number, birthday, gender, email, role`,
-    [username, passwordToStore, nameSurname, phoneNumber, birthday, gender, email, role, staffId]
+     RETURNING staff_id, username, password, name_surname, phone_number, birthday, gender, email, title`,
+    [username, passwordToStore, nameSurname, phoneNumber, birthday, gender, email, title, staffId]
   );
   return rows[0] ? mapStaff(rows[0]) : null;
 };
@@ -100,7 +120,7 @@ const deleteStaff = async (staffId) => {
 const loginStaff = async (username, password) => {
   // We first fetch the user by username and then verify the password.
   const { rows } = await pool.query(
-    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, role
+    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title
      FROM staffs
      WHERE username = $1`,
     [username]
@@ -124,6 +144,8 @@ module.exports = {
   getStaff,
   getStaffById,
   getStaffByUsername,
+  getDoctorName,
+  getNurseName,
   loginStaff,
   createStaff,
   updateStaff,

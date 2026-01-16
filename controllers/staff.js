@@ -2,6 +2,8 @@ const {
   getStaff,
   getStaffById,
   getStaffByUsername,
+  getDoctorName,
+  getNurseName,
   loginStaff,
   createStaff,
   updateStaff,
@@ -41,6 +43,24 @@ const getStaffByUsernameHandler = async (req, res) => {
       return res.status(404).json({ error: 'Staff member not found' });
     }
     res.json(staff);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const getDoctorNameHandler = async (req, res) => {
+  try {
+    const doctors = await getDoctorName();
+    res.json(doctors);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const getNurseNameHandler = async (req, res) => {
+  try {
+    const nurses = await getNurseName();
+    res.json(nurses);
   } catch (error) {
     handleError(res, error);
   }
@@ -92,6 +112,8 @@ module.exports = {
   getStaffById: getStaffByIdHandler,
   getStaffByUsername: getStaffByUsernameHandler,
   loginStaff: loginStaffHandler,
+  getDoctorName: getDoctorNameHandler,
+  getNurseName: getNurseNameHandler,
   addStaff,
   editStaff,
   removeStaff
