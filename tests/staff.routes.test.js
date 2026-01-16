@@ -4,6 +4,8 @@ jest.mock('../models/staff', () => ({
   getStaff: jest.fn().mockResolvedValue([{ staffId: 1, username: 'user1' }]),
   getStaffById: jest.fn().mockResolvedValue({ staffId: 1, username: 'user1' }),
   getStaffByUsername: jest.fn().mockResolvedValue({ staffId: 1, username: 'user1' }),
+  getDoctorName: jest.fn().mockResolvedValue([{ staffId: 1, nameSurname: 'Dr. Smith' }]),
+  getNurseName: jest.fn().mockResolvedValue([{ staffId: 2, nameSurname: 'Nurse Joy' }]),
   loginStaff: jest.fn().mockResolvedValue({ staffId: 1, username: 'user1' }),
   createStaff: jest.fn().mockResolvedValue({ staffId: 2, username: 'newuser' }),
   updateStaff: jest.fn().mockResolvedValue({ staffId: 1, username: 'updated' }),
@@ -35,6 +37,16 @@ describe('Staff routes', () => {
     const res = await request(app).get('/api/staff/login/user1/pass');
     expect(res.status).toBe(200);
     expect(res.body.username).toBe('user1');
+  });
+
+  it('GET /api/staff/doctors should return doctor names', async () => {
+    const res = await request(app).get('/api/staff/doctors');
+    expect(res.status).toBe(200);
+  });
+
+  it('GET /api/staff/nurses should return nurse names', async () => {
+    const res = await request(app).get('/api/staff/nurses');
+    expect(res.status).toBe(200);
   });
 
   it('POST /api/staff should create staff', async () => {
