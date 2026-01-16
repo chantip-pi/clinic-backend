@@ -49,7 +49,7 @@ At a high level:
        birthday DATE,
        gender TEXT,
        email TEXT UNIQUE,
-       role TEXT NOT NULL,
+       title TEXT NOT NULL,
        created_at TIMESTAMPTZ DEFAULT NOW(),
        updated_at TIMESTAMPTZ DEFAULT NOW()
      );
