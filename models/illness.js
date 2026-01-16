@@ -24,7 +24,7 @@ const getIllnessById = async (illnessId) => {
   return rows[0] ? mapIllnesses(rows[0]) : null;
 };
 
-const createIllness = async ({ illness_name, description, category }) => {
+const createIllness = async ({ illnessName, description, category }) => {
   const { rows } = await pool.query(
     `INSERT INTO illness (
             illness_name,
@@ -35,14 +35,14 @@ const createIllness = async ({ illness_name, description, category }) => {
                 illness_name,
                 description,
                 category`,
-    [illness_name, description, category]
+    [illnessName, description, category]
   );
   return mapIllnesses(rows[0]);
 };
 
 const updateIllness = async (
   illnessId,
-  { illness_name, description, category }
+  { illnessName, description, category }
 ) => {
   const { rows } = await pool.query(
     `UPDATE illness
@@ -54,7 +54,7 @@ const updateIllness = async (
                 illness_name,
                 description,
                 category`,
-    [illness_name, description, category, illnessId]
+    [illnessName, description, category, illnessId]
   );
   return rows[0] ? mapIllnesses(rows[0]) : null;
 };

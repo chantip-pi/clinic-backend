@@ -26,10 +26,10 @@ const getAcupointLocationById = async (locationId) => {
 };
 
 const createAcupointLocation = async ({
-  meridian_id,
-  acupoint_code,
-  point_top,
-  point_left,
+  meridianId,
+  acupointCode,
+  pointTop,
+  pointLeft,
 }) => {
   const { rows } = await pool.query(
     `INSERT INTO acupoint_location (
@@ -44,14 +44,14 @@ const createAcupointLocation = async ({
                 acupoint_code,
                 point_top,
                 point_left`,
-    [meridian_id, acupoint_code, point_top, point_left]
+    [meridianId, acupointCode, pointTop, pointLeft]
   );
   return mapAcupointLocations(rows[0]);
 };
 
 const updateAcupointLocation = async (
   locationId,
-  { meridian_id, acupoint_code, point_top, point_left }
+  { meridianId, acupointCode, pointTop, pointLeft }
 ) => {
   const { rows } = await pool.query(
     `UPDATE acupoint_location
@@ -65,7 +65,7 @@ const updateAcupointLocation = async (
                 acupoint_code,
                 point_top,
                 point_left`,
-    [meridian_id, acupoint_code, point_top, point_left, locationId]
+    [meridianId, acupointCode, pointTop, pointLeft, locationId]
   );
   return rows[0] ? mapAcupointLocations(rows[0]) : null;
 };

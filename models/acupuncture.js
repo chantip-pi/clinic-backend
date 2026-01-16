@@ -23,7 +23,7 @@ const getAcupunctureById = async (acupunctureId) => {
   return rows[0] ? mapAcupuncture(rows[0]) : null;
 };
 
-const createAcupuncture = async ({ acupoint_code, meridian_id }) => {
+const createAcupuncture = async ({ acupointCode, meridianId }) => {
   const { rows } = await pool.query(
     `INSERT INTO acupuncture (
             acupoint_code,
@@ -32,14 +32,14 @@ const createAcupuncture = async ({ acupoint_code, meridian_id }) => {
         RETURNING acupuncture_id,
                 acupoint_code,
                 meridian_id`,
-    [acupoint_code, meridian_id]
+    [acupointCode, meridianId]
   );
   return mapAcupuncture(rows[0]);
 };
 
 const updateAcupuncture = async (
   acupunctureId,
-  { acupoint_code, meridian_id }
+  { acupointCode, meridianId }
 ) => {
   const { rows } = await pool.query(
     `UPDATE acupuncture
@@ -49,7 +49,7 @@ const updateAcupuncture = async (
         RETURNING acupuncture_id,
                 acupoint_code,
                 meridian_id`,
-    [acupoint_code, meridian_id, acupunctureId]
+    [acupointCode, meridianId, acupunctureId]
   );
   return rows[0] ? mapAcupuncture(rows[0]) : null;
 };

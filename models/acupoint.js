@@ -24,8 +24,8 @@ const getAcupointByCode = async (acupointCode) => {
 };
 
 const createAcupoint = async ({
-  acupoint_code,
-  acupoint_name,
+  acupointCode,
+  acupointName,
 }) => {
   const { rows } = await pool.query(
     `INSERT INTO acupoint (
@@ -35,21 +35,21 @@ const createAcupoint = async ({
      VALUES ($1, $2)
      RETURNING acupoint_code,
             acupoint_name`,
-    [acupoint_code, acupoint_name]
+    [acupointCode, acupointName]
   );
   return mapAcupoints(rows[0]);
 };
 
 const updateAcupoint = async (
   acupointCode,
-  { acupoint_name }
+  { acupointName }
 ) => {
   const { rows } = await pool.query(
     `UPDATE acupoint
         SET acupoint_name = $1
       WHERE acupoint_code = $2
       RETURNING acupoint_code, acupoint_name`,
-    [acupoint_name, acupointCode]
+    [acupointName, acupointCode]
   );
   return rows[0] ? mapAcupoints(rows[0]) : null;
 };

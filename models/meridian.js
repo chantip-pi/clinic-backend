@@ -25,7 +25,7 @@ const getMeridianById = async (meridianId) => {
   return rows[0] ? mapMeridians(rows[0]) : null;
 };
 
-const createMeridian = async ({ meridian_name, region, side, image }) => {
+const createMeridian = async ({ meridianName, region, side, image }) => {
   const { rows } = await pool.query(
     `INSERT INTO meridian (
          meridian_name,
@@ -39,14 +39,14 @@ const createMeridian = async ({ meridian_name, region, side, image }) => {
                 region,
                 side,
                 image`,
-    [meridian_name, region, side, image]
+    [meridianName, region, side, image]
   );
   return mapMeridians(rows[0]);
 };
 
 const updateMeridian = async (
   meridianId,
-  { meridian_name, region, side, image }
+  { meridianName, region, side, image }
 ) => {
   const { rows } = await pool.query(
     `UPDATE meridian
@@ -60,7 +60,7 @@ const updateMeridian = async (
                 region,
                 side,
                 image`,
-    [meridian_name, region, side, image, meridianId]
+    [meridianName, region, side, image, meridianId]
   );
   return rows[0] ? mapMeridians(rows[0]) : null;
 };
