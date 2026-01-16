@@ -59,7 +59,7 @@ const removeIllness = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ error: "Illness not found" });
     }
-    res.json({ message: "Illness deleted successfully" });
+    res.status(204).send();
   } catch (error) {
     handleError(res, error);
   }

@@ -12,7 +12,7 @@ const getAcupointLocations = async () => {
   const { rows } = await pool.query(
     `SELECT location_id, meridian_id, acupoint_code, point_top, point_left FROM acupoint_location ORDER BY location_id DESC`
   );
-  return rows.map(mapAcupoints);
+  return rows.map(mapAcupointLocations);
 };
 
 const getAcupointLocationById = async (locationId) => {

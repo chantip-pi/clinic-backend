@@ -3,6 +3,10 @@ const staffRoutes = require('./staff');
 const patientRoutes = require('./patient');
 const appointmentRoutes = require('./appointment');
 const acupointRoutes = require('./acupoint');
+const acupointLocationRoutes = require('./acupointLocation');
+const acupunctureRoutes = require('./acupuncture');
+const illnessRoutes = require('./illness');
+const meridianRoutes = require('./meridian');
 const geminiRoutes = require('./gemini');
 const imageRoutes = require('./images');
 
@@ -13,6 +17,10 @@ router.use('/', staffRoutes);
 router.use('/', patientRoutes);
 router.use('/', appointmentRoutes);
 router.use('/', acupointRoutes);
+router.use('/', acupointLocationRoutes);
+router.use('/', acupunctureRoutes);
+router.use('/', illnessRoutes);
+router.use('/', meridianRoutes);
 router.use('/', geminiRoutes);
 router.use('/', imageRoutes);
 

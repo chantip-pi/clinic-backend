@@ -1,0 +1,46 @@
+const request = require('supertest');
+
+jest.mock('../models/acupointLocation', () => ({
+    getAcupointLocations: jest.fn().mockResolvedValue([{ locationId: 1, meridianId: 1, acupointCode: 'LU1', pointTop: 100, pointLeft: 150 }]),
+    getAcupointLocationById: jest.fn().mockResolvedValue({ locationId: 1, meridianId: 1, acupointCode: 'LU1', pointTop: 100, pointLeft: 150 }),
+    createAcupointLocation: jest.fn().mockResolvedValue({ locationId: 2, meridianId: 1, acupointCode: 'LU2', pointTop: 200, pointLeft: 300 }),
+    updateAcupointLocation: jest.fn().mockResolvedValue({ locationId: 1, meridianId: 1, acupointCode: 'LU1', pointTop: 120, pointLeft: 170 }),
+    deleteAcupointLocation: jest.fn().mockResolvedValue(true)
+}));
+
+const app = require('../app');
+
+describe('AcupointLocation routes', () => {
+    it('GET /api/acupoint-locations should list acupoint locations', async () => {
+        const res = await request(app).get('/api/acupoint-locations');
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+    });
+
+    it('GET /api/acupoint-locations/:locationId should return one acupoint location', async () => {
+        const res = await request(app).get('/api/acupoint-locations/1');
+        expect(res.status).toBe(200);
+        expect(res.body.locationId).toBe(1);
+    });
+
+    it('POST /api/acupoint-locations should create acupoint location', async () => {
+        const res = await request(app)
+            .post('/api/acupoint-locations')
+            .send({ meridianId: 1, acupointCode: 'LU2', pointTop: 200, pointLeft: 300 });
+        expect(res.status).toBe(201);
+        expect(res.body.acupointCode).toBe('LU2');
+    });
+
+    it('PUT /api/acupoint-locations/:locationId should update acupoint location', async () => {
+        const res = await request(app)
+            .put('/api/acupoint-locations/1')
+            .send({ meridianId: 1, acupointCode: 'LU1', pointTop: 120, pointLeft: 170 });
+        expect(res.status).toBe(200);
+        expect(res.body.pointTop).toBe(120);
+    });
+
+    it('DELETE /api/acupoint-locations/:locationId should delete acupoint location', async () => {
+        const res = await request(app).delete('/api/acupoint-locations/2');
+        expect(res.status).toBe(204);
+    });
+});

@@ -59,7 +59,7 @@ const removeMeridian = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ error: "Meridian not found" });
     }
-    res.json({ message: "Meridian deleted successfully" });
+    res.status(204).send();
   } catch (error) {
     handleError(res, error);
   }

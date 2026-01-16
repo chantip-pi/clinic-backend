@@ -21,7 +21,7 @@ const listAcupointLocations = async (req, res) => {
 };
 
 const getAcupointLocationByIdHandler = async (req, res) => {
-    try {
+  try {
     const location = await getAcupointLocationById(req.params.locationId);
     if (!location) {
       return res.status(404).json({ error: "Acupoint Location not found" });

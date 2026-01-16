@@ -1,9 +1,10 @@
 const request = require('supertest');
 
 jest.mock('../models/acupoint', () => ({
-  getAcupoints: jest.fn().mockResolvedValue([{ acupunctureCode: 'LU1', acupunctureName: 'Zhong Fu' }]),
-  getAcupointByCode: jest.fn().mockResolvedValue({ acupunctureCode: 'LU1', acupunctureName: 'Zhong Fu' }),
-  createAcupoint: jest.fn().mockResolvedValue({ acupunctureCode: 'LU2', acupunctureName: 'Yun Men' }),
+  getAcupoints: jest.fn().mockResolvedValue([{ acupointCode: 'LU1', acupointName: 'Zhong Fu' }]),
+  getAcupointByCode: jest.fn().mockResolvedValue({ acupointCode: 'LU1', acupointName: 'Zhong Fu' }),
+  createAcupoint: jest.fn().mockResolvedValue({ acupointCode: 'LU2', acupointName: 'Yun Men' }),
+  updateAcupoint: jest.fn().mockResolvedValue({ acupointCode: 'LU1', acupointName: 'Zhong Fu' }),
   deleteAcupoint: jest.fn().mockResolvedValue(true)
 }));
 
@@ -16,26 +17,29 @@ describe('Acupoint routes', () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('GET /api/acupoints/:acupunctureCode should return one acupoint', async () => {
+  it('GET /api/acupoints/:acupointCode should return one acupoint', async () => {
     const res = await request(app).get('/api/acupoints/LU1');
     expect(res.status).toBe(200);
-    expect(res.body.acupunctureCode).toBe('LU1');
-  });
-  it('GET /api/acupoints/:acupunctureCode should return one acupoint', async () => {
-    const res = await request(app).get('/api/acupoints/LU1');
-    expect(res.status).toBe(200);
-    expect(res.body.acupunctureCode).toBe('LU1');
+    expect(res.body.acupointCode).toBe('LU1');
   });
 
   it('POST /api/acupoints should create acupoint', async () => {
     const res = await request(app)
       .post('/api/acupoints')
-      .send({ acupunctureName: 'Yun Men' });
+      .send({ acupointName: 'Yun Men' });
     expect(res.status).toBe(201);
-    expect(res.body.acupunctureName).toBe('Yun Men');
+    expect(res.body.acupointName).toBe('Yun Men');
   });
 
-  it('DELETE /api/acupoints/:acupunctureCode should delete acupoint', async () => {
+  it('PUT /api/acupoints/:acupointCode should update acupoint', async () => {
+    const res = await request(app)
+      .put('/api/acupoints/LU1')
+      .send({ acupointName: 'Zhong Fu' });
+    expect(res.status).toBe(200);
+    expect(res.body.acupointName).toBe('Zhong Fu');
+  });
+
+  it('DELETE /api/acupoints/:acupointCode should delete acupoint', async () => {
     const res = await request(app).delete('/api/acupoints/LU2');
     expect(res.status).toBe(204);
   });

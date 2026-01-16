@@ -52,7 +52,7 @@ const updateAcupoint = async (
     [acupoint_name, acupointCode]
   );
   return rows[0] ? mapAcupoints(rows[0]) : null;
-}
+};
 
 const deleteAcupoint = async (acupointCode) => {
   const { rowCount } = await pool.query(
