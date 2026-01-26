@@ -215,6 +215,34 @@ const deleteAppointment = async (appointmentId) => {
   return rowCount > 0;
 };
 
+const findConflictingAppointment = async ({
+  doctorId,
+  appointmentDateTime,
+  excludeAppointmentId
+}) => {
+  // "Conflict" = same doctor has another scheduled appointment at the same time
+  const values = [doctorId, appointmentDateTime];
+  let excludeClause = '';
+
+  if (excludeAppointmentId) {
+    values.push(excludeAppointmentId);
+    excludeClause = 'AND appointment_id <> $3';
+  }
+
+  const { rows } = await pool.query(
+    `SELECT appointment_id
+     FROM appointments
+     WHERE doctor_id = $1
+       AND appointment_date_time = $2
+       AND status = 'scheduled'
+       ${excludeClause}
+     LIMIT 1`,
+    values
+  );
+
+  return rows[0] || null;
+};
+
 module.exports = {
   getAppointments,
   getAppointmentById,
@@ -224,7 +252,8 @@ module.exports = {
   getUpcomingAppointmentDate,
   createAppointment,
   updateAppointment,
-  deleteAppointment
+  deleteAppointment,
+  findConflictingAppointment
 };
 
 

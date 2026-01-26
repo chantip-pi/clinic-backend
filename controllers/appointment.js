@@ -9,9 +9,21 @@ const {
   deleteAppointment,
   getAppointmentsByDoctorId
 } = require('../models/appointment');
+const { assertDoctorAvailable } = require('../services/appointmentAvailability');
+const {
+  AppointmentTimeUnavailableError
+} = require('../errors/AppointmentTimeUnavailableError');
 
 const handleError = (res, error) => {
   console.error(error);
+
+  if (error instanceof AppointmentTimeUnavailableError) {
+    return res.status(409).json({
+      error: error.message,
+      code: 'AppointmentTimeUnavailableError'
+    });
+  }
+
   res.status(500).json({ error: 'Something went wrong' });
 };
 
@@ -73,6 +85,10 @@ const getUpcomingAppointmentDateHandler = async (req, res) => {
 
 const addAppointment = async (req, res) => {
   try {
+    await assertDoctorAvailable({
+      doctorId: req.body.doctorId,
+      appointmentDateTime: req.body.appointmentDateTime
+    });
     const appointment = await createAppointment(req.body);
     res.status(201).json(appointment);
   } catch (error) {
@@ -82,10 +98,20 @@ const addAppointment = async (req, res) => {
 
 const editAppointment = async (req, res) => {
   try {
-    const appointment = await updateAppointment(req.params.appointmentId, req.body);
-    if (!appointment) {
+    const existing = await getAppointmentById(req.params.appointmentId);
+    if (!existing) {
       return res.status(404).json({ error: 'Appointment not found' });
     }
+
+    const merged = { ...existing, ...req.body };
+
+    await assertDoctorAvailable({
+      doctorId: merged.doctorId,
+      appointmentDateTime: merged.appointmentDateTime,
+      excludeAppointmentId: req.params.appointmentId
+    });
+
+    const appointment = await updateAppointment(req.params.appointmentId, merged);
     res.json(appointment);
   } catch (error) {
     handleError(res, error);
