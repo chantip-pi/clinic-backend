@@ -124,7 +124,7 @@ When you add a new entity, you typically follow this order:
 
 2. **Create the model (e.g. `models/appointment.js`)**  
    - Import `pool` from `config/database.js`.  
-   - Write query functions like `getAppointments`, `getAppointmentById`, `createAppointment`, `updateAppointment`, `deleteAppointment`.  
+   - Write query functions like `getAppointments`, `getAppointmentById`, `createAppointment`, `updateAppointment`, `cancelAppointment`.  
    - Map DB rows into plain JS objects that match your frontend interface (`Appointment` in this case).
 
 3. **Create the controller (e.g. `controllers/appointment.js`)**  
