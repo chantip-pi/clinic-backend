@@ -13,6 +13,9 @@ jest.mock('../models/appointment', () => ({
   getAppointmentsByPatientId: jest.fn().mockResolvedValue([
     { appointmentId: 1, patientId: 1, appointmentDateTime: '2025-01-01T10:00:00Z' }
   ]),
+  getAppointmentsByDoctorId: jest.fn().mockResolvedValue([
+    { appointmentId: 1, patientId: 1, appointmentDateTime: '2025-01-01T10:00:00Z' }
+  ]),
   getUpcomingAppointmentDate: jest.fn().mockResolvedValue('2025-01-01T10:00:00Z'),
   createAppointment: jest
     .fn()
@@ -20,7 +23,7 @@ jest.mock('../models/appointment', () => ({
   updateAppointment: jest
     .fn()
     .mockResolvedValue({ appointmentId: 1, patientId: 1, appointmentDateTime: '2025-03-01T10:00:00Z' }),
-  deleteAppointment: jest.fn().mockResolvedValue(true)
+  cancelAppointment: jest.fn().mockResolvedValue(true)
 }));
 
 const app = require('../app');
@@ -46,6 +49,12 @@ describe('Appointment routes', () => {
 
   it('GET /api/appointments/patient/:patientId should filter by patient', async () => {
     const res = await request(app).get('/api/appointments/patient/1');
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it('GET /api/appointments/doctor/:doctorId should filter by doctor', async () => {
+    const res = await request(app).get('/api/appointments/doctor/1');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
