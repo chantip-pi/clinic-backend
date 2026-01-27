@@ -14,6 +14,45 @@ const {
   AppointmentTimeUnavailableError
 } = require('../errors/AppointmentTimeUnavailableError');
 
+// Normalize incoming appointment data so that if the date/time is in the past
+// AND the status is currently "scheduled", the status is automatically set to
+// "canceled". Completed or other non-scheduled appointments are left unchanged.
+const normalizeAppointmentPayload = (payload) => {
+  const { appointmentDateTime } = payload;
+  let { status } = payload;
+
+  if (
+    appointmentDateTime &&
+    new Date(appointmentDateTime) < new Date() &&
+    status === 'scheduled'
+  ) {
+    status = 'canceled';
+  }
+
+  return { ...payload, status };
+};
+
+// Applies normalization to an appointment coming from the database and, if the
+// status changes (e.g. from "scheduled" to "canceled" because it is in the past),
+// persists that change back to the database.
+const normalizeAndPersistAppointment = async (appointment) => {
+  if (!appointment) return appointment;
+
+  const normalized = normalizeAppointmentPayload(appointment);
+
+  if (normalized.status !== appointment.status) {
+    await updateAppointment(appointment.appointmentId, {
+      patientId: normalized.patientId,
+      doctorId: normalized.doctorId,
+      appointmentDateTime: normalized.appointmentDateTime,
+      status: normalized.status,
+      reason: normalized.reason
+    });
+  }
+
+  return normalized;
+};
+
 const handleError = (res, error) => {
   console.error(error);
 
@@ -30,7 +69,10 @@ const handleError = (res, error) => {
 const listAllAppointments = async (req, res) => {
   try {
     const appointments = await getAppointments();
-    res.json(appointments);
+    const normalized = await Promise.all(
+      appointments.map(normalizeAndPersistAppointment)
+    );
+    res.json(normalized);
   } catch (error) {
     handleError(res, error);
   }
@@ -42,7 +84,8 @@ const getAppointmentByIdHandler = async (req, res) => {
     if (!appointment) {
       return res.status(404).json({ error: 'Appointment not found' });
     }
-    res.json(appointment);
+    const normalized = await normalizeAndPersistAppointment(appointment);
+    res.json(normalized);
   } catch (error) {
     handleError(res, error);
   }
@@ -51,7 +94,10 @@ const getAppointmentByIdHandler = async (req, res) => {
 const getAppointmentsByDateHandler = async (req, res) => {
   try {
     const appointments = await getAppointmentsByDate(req.params.appointmentDate);
-    res.json(appointments);
+    const normalized = await Promise.all(
+      appointments.map(normalizeAndPersistAppointment)
+    );
+    res.json(normalized);
   } catch (error) {
     handleError(res, error);
   }
@@ -60,7 +106,10 @@ const getAppointmentsByDateHandler = async (req, res) => {
 const getAppointmentsByPatientIdHandler = async (req, res) => {
   try {
     const appointments = await getAppointmentsByPatientId(req.params.patientId);
-    res.json(appointments);
+    const normalized = await Promise.all(
+      appointments.map(normalizeAndPersistAppointment)
+    );
+    res.json(normalized);
   } catch (error) {
     handleError(res, error);
   }
@@ -68,7 +117,10 @@ const getAppointmentsByPatientIdHandler = async (req, res) => {
 const getAppointmentsByDoctorIdHandler = async (req, res) => {
   try {
     const appointments = await getAppointmentsByDoctorId(req.params.doctorId);
-    res.json(appointments);
+    const normalized = await Promise.all(
+      appointments.map(normalizeAndPersistAppointment)
+    );
+    res.json(normalized);
   } catch (error) {
     handleError(res, error);
   }
@@ -85,11 +137,18 @@ const getUpcomingAppointmentDateHandler = async (req, res) => {
 
 const addAppointment = async (req, res) => {
   try {
-    await assertDoctorAvailable({
-      doctorId: req.body.doctorId,
-      appointmentDateTime: req.body.appointmentDateTime
-    });
-    const appointment = await createAppointment(req.body);
+    const payload = normalizeAppointmentPayload(req.body);
+    const { doctorId, appointmentDateTime, status } = payload;
+
+    // Only check availability for appointments that are actually scheduled
+    if (status === 'scheduled') {
+      await assertDoctorAvailable({
+        doctorId,
+        appointmentDateTime
+      });
+    }
+
+    const appointment = await createAppointment(payload);
     res.status(201).json(appointment);
   } catch (error) {
     handleError(res, error);
@@ -103,13 +162,16 @@ const editAppointment = async (req, res) => {
       return res.status(404).json({ error: 'Appointment not found' });
     }
 
-    const merged = { ...existing, ...req.body };
+    const merged = normalizeAppointmentPayload({ ...existing, ...req.body });
 
-    await assertDoctorAvailable({
-      doctorId: merged.doctorId,
-      appointmentDateTime: merged.appointmentDateTime,
-      excludeAppointmentId: req.params.appointmentId
-    });
+    // Only check availability for appointments that are actually scheduled
+    if (merged.status === 'scheduled') {
+      await assertDoctorAvailable({
+        doctorId: merged.doctorId,
+        appointmentDateTime: merged.appointmentDateTime,
+        excludeAppointmentId: req.params.appointmentId
+      });
+    }
 
     const appointment = await updateAppointment(req.params.appointmentId, merged);
     res.json(appointment);
