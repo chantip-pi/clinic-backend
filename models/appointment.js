@@ -207,9 +207,9 @@ const updateAppointment = async (
   return rows[0] ? mapAppointment(rows[0]) : null;
 };
 
-const deleteAppointment = async (appointmentId) => {
+const cancelAppointment = async (appointmentId) => {
   const { rowCount } = await pool.query(
-    'DELETE FROM appointments WHERE appointment_id = $1',
+    'UPDATE FROM appointments WHERE appointment_id = $1 SET status ="canceled"',
     [appointmentId]
   );
   return rowCount > 0;
@@ -252,7 +252,7 @@ module.exports = {
   getUpcomingAppointmentDate,
   createAppointment,
   updateAppointment,
-  deleteAppointment,
+  cancelAppointment,
   findConflictingAppointment
 };
 

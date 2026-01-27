@@ -23,7 +23,7 @@ jest.mock('../models/appointment', () => ({
   updateAppointment: jest
     .fn()
     .mockResolvedValue({ appointmentId: 1, patientId: 1, appointmentDateTime: '2025-03-01T10:00:00Z' }),
-  deleteAppointment: jest.fn().mockResolvedValue(true)
+  cancelAppointment: jest.fn().mockResolvedValue(true)
 }));
 
 const app = require('../app');

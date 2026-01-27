@@ -6,7 +6,7 @@ const {
   getUpcomingAppointmentDate,
   createAppointment,
   updateAppointment,
-  deleteAppointment,
+  cancelAppointment,
   getAppointmentsByDoctorId
 } = require('../models/appointment');
 const { assertDoctorAvailable } = require('../services/appointmentAvailability');
@@ -120,7 +120,7 @@ const editAppointment = async (req, res) => {
 
 const removeAppointment = async (req, res) => {
   try {
-    const deleted = await deleteAppointment(req.params.appointmentId);
+    const deleted = await cancelAppointment(req.params.appointmentId);
     if (!deleted) {
       return res.status(404).json({ error: 'Appointment not found' });
     }
