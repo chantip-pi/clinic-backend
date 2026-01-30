@@ -3,15 +3,16 @@ const {
   listAcupoints,
   getAcupointByCode,
   addAcupoint,
+  editAcupoint,
   removeAcupoint
 } = require('../controllers/acupoint');
 
 const router = express.Router();
 
 router.get('/acupoints', listAcupoints);
-router.get('/acupoints/:acupunctureCode', getAcupointByCode);
+router.get('/acupoints/:acupointCode', getAcupointByCode);
 router.post('/acupoints', addAcupoint);
-router.delete('/acupoints/:acupunctureCode', removeAcupoint);
-;
+router.put('/acupoints/:acupointCode', editAcupoint);
+router.delete('/acupoints/:acupointCode', removeAcupoint);
 
 module.exports = router;
