@@ -6,7 +6,7 @@ jest.mock('../models/meridian', () => ({
     getMeridianRegion: jest.fn().mockResolvedValue([{ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }]),
     getMeridianSidesByRegion: jest.fn().mockResolvedValue([{ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }]),
     createMeridian: jest.fn().mockResolvedValue({ meridianId: 2, meridianName: 'Large Intestine', region: 'Head', side: 'Right', image: 'large_intestine.png' }),
-    updateMeridian: jest.fn().mockResolvedValue({ meridianId: 2, meridianName: 'Lung Updated', region: 'Head', side: 'Left', image: 'lung_updated.png' }),
+    updateMeridian: jest.fn().mockResolvedValue({ meridianId: 1, meridianName: 'Lung Updated', region: 'Head', side: 'Left', image: 'lung_updated.png' }),
     deleteMeridian: jest.fn().mockResolvedValue(true)
 }));
 
