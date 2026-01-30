@@ -144,6 +144,28 @@ const getUpcomingAppointmentDate = async (patientId) => {
   return rows[0] ? rows[0].appointment_date_time : null;
 };
 
+const getScheduledAppointmentsByPatientId = async (patientId) => {
+  const { rows } = await pool.query(
+    `SELECT a.appointment_id,
+            a.patient_id,
+            a.doctor_id,
+            a.appointment_date_time,
+            a.status,
+            a.reason,
+            a.created_at,
+            p.name_surname AS patient_name,
+            s.name_surname AS doctor_name
+     FROM appointments a
+     LEFT JOIN patients p ON p.patient_id = a.patient_id
+     LEFT JOIN staffs s ON s.staff_id = a.doctor_id
+     WHERE a.patient_id = $1
+       AND a.status = 'scheduled'
+     ORDER BY a.appointment_date_time DESC`,
+    [patientId]
+  );
+  return rows.map(mapAppointment);
+};
+
 const createAppointment = async ({
   patientId,
   doctorId,
@@ -207,14 +229,6 @@ const updateAppointment = async (
   return rows[0] ? mapAppointment(rows[0]) : null;
 };
 
-const cancelAppointment = async (appointmentId) => {
-  const { rowCount } = await pool.query(
-    'UPDATE FROM appointments WHERE appointment_id = $1 SET status ="canceled"',
-    [appointmentId]
-  );
-  return rowCount > 0;
-};
-
 const findConflictingAppointment = async ({
   doctorId,
   appointmentDateTime,
@@ -250,9 +264,9 @@ module.exports = {
   getAppointmentsByPatientId,
   getAppointmentsByDoctorId,
   getUpcomingAppointmentDate,
+  getScheduledAppointmentsByPatientId,
   createAppointment,
   updateAppointment,
-  cancelAppointment,
   findConflictingAppointment
 };
 

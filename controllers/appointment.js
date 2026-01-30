@@ -4,10 +4,11 @@ const {
   getAppointmentsByDate,
   getAppointmentsByPatientId,
   getUpcomingAppointmentDate,
+  getScheduledAppointmentsByPatientId,
   createAppointment,
   updateAppointment,
-  cancelAppointment,
-  getAppointmentsByDoctorId
+  getAppointmentsByDoctorId,
+  deleteAppointment
 } = require('../models/appointment');
 const { assertDoctorAvailable } = require('../services/appointmentAvailability');
 const {
@@ -155,7 +156,7 @@ const addAppointment = async (req, res) => {
   }
 };
 
-const editAppointment = async (req, res) => {
+const updateAppointmentHandler = async (req, res) => {
   try {
     const existing = await getAppointmentById(req.params.appointmentId);
     if (!existing) {
@@ -182,7 +183,7 @@ const editAppointment = async (req, res) => {
 
 const removeAppointment = async (req, res) => {
   try {
-    const deleted = await cancelAppointment(req.params.appointmentId);
+    const deleted = await deleteAppointment(req.params.appointmentId);
     if (!deleted) {
       return res.status(404).json({ error: 'Appointment not found' });
     }
@@ -192,6 +193,34 @@ const removeAppointment = async (req, res) => {
   }
 };
 
+const getScheduledAppointmentsByPatientIdHandler = async (req, res) => {
+  try {
+    const appointments = await getScheduledAppointmentsByPatientId(req.params.patientId);
+    res.json(appointments);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+
+const cancelAppointmentHandler = async (req, res) => {
+  try {
+    const existing = await getAppointmentById(req.params.appointmentId);
+    if (!existing) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    const appointment = await updateAppointment(req.params.appointmentId, {
+      ...existing,
+      status: 'canceled'
+    });
+    res.json(appointment);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+
 module.exports = {
   listAllAppointments,
   getAppointmentById: getAppointmentByIdHandler,
@@ -199,9 +228,11 @@ module.exports = {
   getAppointmentsByPatientId: getAppointmentsByPatientIdHandler,
   getAppointmentsByDoctorId: getAppointmentsByDoctorIdHandler,
   getUpcomingAppointmentDate: getUpcomingAppointmentDateHandler,
+  getScheduledAppointmentsByPatientId: getScheduledAppointmentsByPatientIdHandler,
   addAppointment,
-  editAppointment,
-  removeAppointment
+  updateAppointment: updateAppointmentHandler,
+  cancelAppointment: cancelAppointmentHandler,
+  removeAppointment,
 };
 
 
