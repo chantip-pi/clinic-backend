@@ -9,10 +9,10 @@ const {
 
 const router = express.Router();
 
-router.get("/acupoint-locations", listAcupointLocations);
-router.get("/acupoint-locations/:locationId", getAcupointLocationById);
-router.post("/acupoint-locations", addAcupointLocation);
-router.put("/acupoint-locations/:locationId", editAcupointLocation);
-router.delete("/acupoint-locations/:locationId", removeAcupointLocation);
+router.get("/acupointLocations", listAcupointLocations);
+router.get("/acupointLocations/:locationId", getAcupointLocationById);
+router.post("/acupointLocations", addAcupointLocation);
+router.put("/acupointLocations/:locationId", editAcupointLocation);
+router.delete("/acupointLocations/:locationId", removeAcupointLocation);
 
 module.exports = router;
