@@ -25,6 +25,34 @@ const getMeridianById = async (meridianId) => {
   return rows[0] ? mapMeridians(rows[0]) : null;
 };
 
+const getMeridianRegion = async () => {
+  const { rows } = await pool.query(
+    `SELECT DISTINCT region FROM meridian`
+  );
+  return rows.map(mapMeridians);
+};
+
+const getMeridianSidesByRegion = async (region) => {
+  const res = await pool.query(
+    `
+    SELECT LOWER(region) AS region, LOWER(side) AS side
+    FROM meridian
+    WHERE LOWER(region) = ANY($1)
+    GROUP BY region, side
+    `,
+    [region],
+  );
+
+  const map = {};
+
+  res.rows.forEach(({ region, side }) => {
+    if (!map[region]) map[region] = [];
+    map[region].push(side);
+  });
+
+  return map;
+};
+
 const createMeridian = async ({ meridianName, region, side, image }) => {
   const { rows } = await pool.query(
     `INSERT INTO meridian (
@@ -76,6 +104,8 @@ const deleteMeridian = async (meridianId) => {
 module.exports = {
   getMeridians,
   getMeridianById,
+  getMeridianRegion,
+  getMeridianSidesByRegion,
   createMeridian,
   updateMeridian,
   deleteMeridian,
