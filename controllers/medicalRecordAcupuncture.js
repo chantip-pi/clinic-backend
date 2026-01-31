@@ -2,7 +2,6 @@ const {
   getMedicalRecordAcupunctures,
   getAcupuncturesByRecordId,
   createMedicalRecordAcupuncture,
-  updateMedicalRecordAcupuncture,
   deleteMedicalRecordAcupuncture,
   deleteAllAcupuncturesForRecord,
 } = require("../models/medicalRecordAcupuncture");
@@ -23,11 +22,11 @@ const listMedicalRecordAcupunctures = async (req, res) => {
 
 const getMedicalRecordAcupuncturesByRecordIdHandler = async (req, res) => {
   try {
-    const medicalRecordAcupuncture = await getMedicalRecordAcupunctureById(req.params.recordId);
-    if (!medicalRecordAcupuncture) {
-      return res.status(404).json({ error: "Medical Record Acupuncture not found" });
-    }
-    res.json(medicalRecordAcupuncture);
+    const { recordId } = req.params;
+
+    const acupunctures = await getAcupuncturesByRecordId(recordId);
+
+    res.json(acupunctures);
   } catch (error) {
     handleError(res, error);
   }
@@ -35,24 +34,16 @@ const getMedicalRecordAcupuncturesByRecordIdHandler = async (req, res) => {
 
 const addMedicalRecordAcupuncture = async (req, res) => {
   try {
-    const medicalRecordAcupuncture = await createMedicalRecordAcupuncture(req.body);
-    res.status(201).json(medicalRecordAcupuncture);
-  } catch (error) {
-    handleError(res, error);
-  }
-};
+    const { recordId } = req.params;
+    const { acupunctureId } = req.body;
 
-const editMedicalRecordAcupuncture = async (req, res) => {
-  try {
-    const medicalRecordAcupuncture = await updateMedicalRecordAcupuncture(
-      req.params.recordAcupunctureId,
-      req.params.acupunctureId,
-      req.body
-    );
-    if (!medicalRecordAcupuncture) {
-      return res.status(404).json({ error: "Medical Record Acupuncture not found" });
-    }
-    res.json(medicalRecordAcupuncture);
+    const medicalRecordAcupuncture =
+      await createMedicalRecordAcupuncture({
+        recordId,
+        acupunctureId,
+      });
+
+    res.status(201).json(medicalRecordAcupuncture);
   } catch (error) {
     handleError(res, error);
   }
@@ -60,11 +51,32 @@ const editMedicalRecordAcupuncture = async (req, res) => {
 
 const removeMedicalRecordAcupuncture = async (req, res) => {
   try {
-    const deleted = await deleteMedicalRecordAcupuncture(req.params.recordId);
+    const { recordId, acupunctureId } = req.params;
+
+    const deleted = await deleteMedicalRecordAcupuncture(
+      recordId,
+      acupunctureId
+    );
+
     if (!deleted) {
-      return res.status(404).json({ error: "Medical Record Acupuncture not found" });
+      return res
+        .status(404)
+        .json({ error: "Medical Record Acupuncture not found" });
     }
+
     res.status(204).send();
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const removeAllAcupuncturesForRecord = async (req, res) => {
+  try {
+    const { recordId } = req.params;
+
+    const deletedCount = await deleteAllAcupuncturesForRecord(recordId);
+
+    res.json({ deleted: deletedCount });
   } catch (error) {
     handleError(res, error);
   }
@@ -72,8 +84,8 @@ const removeMedicalRecordAcupuncture = async (req, res) => {
 
 module.exports = {
   listMedicalRecordAcupunctures,
-  getMedicalRecordAcupunctureById: getMedicalRecordAcupuncturesByIdHandler,
+  getMedicalRecordAcupuncturesByRecordId: getMedicalRecordAcupuncturesByRecordIdHandler,
   addMedicalRecordAcupuncture,
-  editMedicalRecordAcupuncture,
   removeMedicalRecordAcupuncture,
+  removeAllAcupuncturesForRecord,
 };
