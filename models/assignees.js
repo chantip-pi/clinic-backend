@@ -16,20 +16,20 @@ async function getStaffsByRecordId(recordId) {
     }));
   }
   
-  async function assignStaffsToRecord(recordId, nurseIds) {
+  async function assignStaffsToRecord(recordId, staffIds) {
     await pool.query('DELETE FROM assignees WHERE record_id = $1', [
       recordId
     ]);
   
-    if (Array.isArray(nurseIds) && nurseIds.length > 0) {
-      const values = nurseIds
+    if (Array.isArray(staffIds) && staffIds.length > 0) {
+      const values = staffIds
         .map((_, index) => `($1, $${index + 2})`)
         .join(', ');
   
       await pool.query(
         `INSERT INTO assignees (record_id, staff_id)
          VALUES ${values}`,
-        [recordId, ...nurseIds]
+        [recordId, ...staffIds]
       );
     }
   

@@ -114,7 +114,7 @@ async function getStaffsByRecordId(recordId) {
     `SELECT s.staff_id,
             s.name_surname
      FROM medical_record_staffs mrn
-     JOIN staffs s ON s.staff_id = mrn.nurse_id
+     JOIN staffs s ON s.staff_id = mrn.staff_id
      WHERE mrn.record_id = $1`,
     [recordId]
   );
@@ -125,20 +125,20 @@ async function getStaffsByRecordId(recordId) {
   }));
 }
 
-async function assignStaffsToRecord(recordId, nurseIds) {
+async function assignStaffsToRecord(recordId, staffIds) {
   await pool.query('DELETE FROM medical_record_staffs WHERE record_id = $1', [
     recordId
   ]);
 
-  if (Array.isArray(nurseIds) && nurseIds.length > 0) {
-    const values = nurseIds
+  if (Array.isArray(staffIds) && staffIds.length > 0) {
+    const values = staffIds
       .map((_, index) => `($1, $${index + 2})`)
       .join(', ');
 
     await pool.query(
-      `INSERT INTO medical_record_staffs (record_id, nurse_id)
+      `INSERT INTO medical_record_staffs (record_id, staff_id)
        VALUES ${values}`,
-      [recordId, ...nurseIds]
+      [recordId, ...staffIds]
     );
   }
 

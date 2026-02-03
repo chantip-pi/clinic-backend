@@ -5,7 +5,7 @@ jest.mock('../models/staff', () => ({
   getStaffById: jest.fn().mockResolvedValue({ staffId: 1, username: 'user1' }),
   getStaffByUsername: jest.fn().mockResolvedValue({ staffId: 1, username: 'user1' }),
   getDoctorName: jest.fn().mockResolvedValue([{ staffId: 1, nameSurname: 'Dr. Smith' }]),
-  getNurseName: jest.fn().mockResolvedValue([{ staffId: 2, nameSurname: 'Nurse Joy' }]),
+  getStaffName: jest.fn().mockResolvedValue([{ staffId: 2, nameSurname: 'Staff Joy' }]),
   loginStaff: jest.fn().mockResolvedValue({ staffId: 1, username: 'user1' }),
   createStaff: jest.fn().mockResolvedValue({ staffId: 2, username: 'newuser' }),
   updateStaff: jest.fn().mockResolvedValue({ staffId: 1, username: 'updated' }),
@@ -44,8 +44,8 @@ describe('Staff routes', () => {
     expect(res.status).toBe(200);
   });
 
-  it('GET /api/staff/nurses should return nurse names', async () => {
-    const res = await request(app).get('/api/staff/nurses');
+  it('GET /api/staff/staffs should return staff names', async () => {
+    const res = await request(app).get('/api/staff/staffs');
     expect(res.status).toBe(200);
   });
 

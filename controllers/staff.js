@@ -3,7 +3,7 @@ const {
   getStaffById,
   getStaffByUsername,
   getDoctorName,
-  getNurseName,
+  getStaffName,
   loginStaff,
   createStaff,
   updateStaff,
@@ -57,10 +57,10 @@ const getDoctorNameHandler = async (req, res) => {
   }
 };
 
-const getNurseNameHandler = async (req, res) => {
+const getStaffNameHandler = async (req, res) => {
   try {
-    const nurses = await getNurseName();
-    res.json(nurses);
+    const staffs = await getStaffName();
+    res.json(staffs);
   } catch (error) {
     handleError(res, error);
   }
@@ -113,7 +113,7 @@ module.exports = {
   getStaffByUsername: getStaffByUsernameHandler,
   loginStaff: loginStaffHandler,
   getDoctorName: getDoctorNameHandler,
-  getNurseName: getNurseNameHandler,
+  getStaffName: getStaffNameHandler,
   addStaff,
   editStaff,
   removeStaff

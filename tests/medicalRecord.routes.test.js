@@ -25,12 +25,12 @@ jest.mock('../models/medicalRecord', () => {
     createMedicalRecord: jest.fn().mockResolvedValue(mockMedicalRecord),
     updateMedicalRecord: jest.fn().mockResolvedValue({ ...mockMedicalRecord, diagnosis: 'Updated diagnosis' }),
     getStaffsByRecordId: jest.fn().mockResolvedValue([
-      { staffId: 3, nameSurname: 'Nurse Joy' },
-      { staffId: 4, nameSurname: 'Nurse Bob' }
+      { staffId: 3, nameSurname: 'Staff Joy' },
+      { staffId: 4, nameSurname: 'Staff Bob' }
     ]),
     assignStaffsToRecord: jest.fn().mockResolvedValue([
-      { staffId: 3, nameSurname: 'Nurse Joy' },
-      { staffId: 4, nameSurname: 'Nurse Bob' }
+      { staffId: 3, nameSurname: 'Staff Joy' },
+      { staffId: 4, nameSurname: 'Staff Bob' }
     ])
   };
 });
