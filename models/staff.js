@@ -56,11 +56,11 @@ const getDoctorName = async () => {
   return rows.map(mapName);
 };    
   
-const getNurseName = async () => {
+const getStaffName = async () => {
   const { rows } = await pool.query(
     `SELECT staff_id, name_surname
       FROM staffs
-      WHERE title = 'Nurse'`);
+      WHERE title = 'Staff'`);
   return rows.map(mapName);
 }
 
@@ -145,7 +145,7 @@ module.exports = {
   getStaffById,
   getStaffByUsername,
   getDoctorName,
-  getNurseName,
+  getStaffName,
   loginStaff,
   createStaff,
   updateStaff,

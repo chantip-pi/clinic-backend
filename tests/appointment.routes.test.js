@@ -17,13 +17,16 @@ jest.mock('../models/appointment', () => ({
     { appointmentId: 1, patientId: 1, appointmentDateTime: '2025-01-01T10:00:00Z' }
   ]),
   getUpcomingAppointmentDate: jest.fn().mockResolvedValue('2025-01-01T10:00:00Z'),
+  getScheduledAppointmentsByPatientId: jest.fn().mockResolvedValue([
+    { appointmentId: 1, patientId: 1, appointmentDateTime: '2025-01-01T10:00:00Z' }
+  ]),
   createAppointment: jest
     .fn()
     .mockResolvedValue({ appointmentId: 2, patientId: 1, appointmentDateTime: '2025-02-01T10:00:00Z' }),
   updateAppointment: jest
     .fn()
     .mockResolvedValue({ appointmentId: 1, patientId: 1, appointmentDateTime: '2025-03-01T10:00:00Z' }),
-  cancelAppointment: jest.fn().mockResolvedValue(true)
+  deleteAppointment: jest.fn().mockResolvedValue(true)
 }));
 
 const app = require('../app');
@@ -65,6 +68,12 @@ describe('Appointment routes', () => {
     expect(res.body).toBeDefined();
   });
 
+  it('GET /api/appointments/scheduled/:patientId should return scheduled appointments', async () => {
+    const res = await request(app).get('/api/appointments/scheduled/1');
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
   it('POST /api/appointments should create appointment', async () => {
     const res = await request(app)
       .post('/api/appointments')
@@ -80,6 +89,13 @@ describe('Appointment routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.appointmentId).toBe(1);
   });
+
+  it('PUT /api/appointments/:appointmentId/cancel should cancel appointment', async () => {
+    const res = await request(app).put('/api/appointments/1/cancel');
+    expect(res.status).toBe(200);
+    expect(res.body.appointmentId).toBe(1);
+  });
+
 
   it('DELETE /api/appointments/:appointmentId should delete appointment', async () => {
     const res = await request(app).delete('/api/appointments/1');
