@@ -56,7 +56,8 @@ const createMedicalRecordHandler = async (req, res) => {
       diagnosis, 
       symptoms, 
       prescriptions, 
-      remarks 
+      remarks,
+      assignees
     } = req.body;
 
     // Validate required fields for records without appointments
@@ -90,8 +91,10 @@ const createMedicalRecordHandler = async (req, res) => {
         diagnosis,
         symptoms,
         prescriptions,
-        remarks
+        remarks,
       });
+
+      const staffs = await assignStaffsToRecord(medicalRecord.recordId, assignees);
 
       // If appointment is scheduled, update it to completed (pass full appointment so other columns are not set to null)
       if (appointment.status === 'scheduled') {
