@@ -76,7 +76,7 @@ const removeAllAcupuncturesForRecord = async (req, res) => {
 
     const deletedCount = await deleteAllAcupuncturesForRecord(recordId);
 
-    res.json({ deleted: deletedCount });
+    res.status(204).send({ deletedCount });
   } catch (error) {
     handleError(res, error);
   }

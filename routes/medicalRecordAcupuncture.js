@@ -11,8 +11,8 @@ const router = express.Router();
 
 router.get("/medicalRecordAcupunctures", listMedicalRecordAcupunctures);
 router.get("/medicalRecordAcupunctures/:recordId", getMedicalRecordAcupuncturesByRecordId);
-router.post("/medicalRecordAcupunctures", addMedicalRecordAcupuncture);
-router.put("/medicalRecordAcupunctures/:recordId", removeMedicalRecordAcupuncture);
+router.post("/medicalRecordAcupunctures/:recordId", addMedicalRecordAcupuncture);
+router.delete("/medicalRecordAcupunctures/:recordId/:acupunctureId", removeMedicalRecordAcupuncture);
 router.delete("/medicalRecordAcupunctures/:recordId", removeAllAcupuncturesForRecord);
 
 module.exports = router;

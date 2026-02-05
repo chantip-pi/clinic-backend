@@ -19,7 +19,7 @@ describe("Meridian routes", () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it("GET /api/meridians/:meridianId should return one meridian", async () => {
+  it("GET /api/meridians/meridian/:meridianId should return one meridian", async () => {
     const res = await request(app).get("/api/meridians/meridian/1");
     expect(res.status).toBe(200);
     expect(res.body.meridianId).toBe(1);
