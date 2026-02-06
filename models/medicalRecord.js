@@ -1,6 +1,6 @@
 const { pool } = require('../config/database');
 
-const mapMedicalRecord = (row, assignees = []) => ({
+const mapMedicalRecord = (row) => ({
   recordId: row.record_id,
   appointmentId: row.appointment_id,
   patientId: row.patient_id,
@@ -11,64 +11,56 @@ const mapMedicalRecord = (row, assignees = []) => ({
   prescriptions: row.prescriptions,
   remarks: row.remarks,
   createdAt: row.created_at,
-  updatedAt: row.updated_at,
+  lastAmendedAt: row.last_amended_at,
+  lastAmendedBy: row.last_amended_by,
+  currentVersion: row.current_version,
+  isLocked: row.is_locked,
   patientName: row.patient_name,
   doctorName: row.doctor_name,
-  assignees: assignees
+  assignees: row.assignees || [],
+  assigneesNames: row.assignees_names || []
 });
 
-const baseSelect = `
-  SELECT mr.record_id,
-         mr.appointment_id,
-         mr.patient_id,
-         mr.doctor_id,
-         mr.date_time,
-         mr.diagnosis,
-         mr.symptoms,
-         mr.prescriptions,
-         mr.remarks,
-         mr.created_at,
-         mr.updated_at,
-         p.name_surname AS patient_name,
-         s.name_surname AS doctor_name
-  FROM medical_records mr
-  LEFT JOIN patients p ON p.patient_id = mr.patient_id
-  LEFT JOIN staffs s ON s.staff_id = mr.doctor_id
-`;
 
 async function getMedicalRecords() {
-  const { rows } = await pool.query(`${baseSelect} ORDER BY mr.created_at DESC`);
-  const recordsWithAssignees = await Promise.all(
-    rows.map(async (row) => {
-      const assignees = await getStaffsByRecordId(row.record_id);
-      return mapMedicalRecord(row, assignees);
-    })
+const { rows } = await pool.query(
+    `
+    SELECT *
+    FROM vw_medical_records
+    ORDER BY created_at DESC
+    `
   );
-  return recordsWithAssignees;
+
+  return rows.map(mapMedicalRecord);
 }
 
 async function getMedicalRecordById(recordId) {
-  const { rows } = await pool.query(`${baseSelect} WHERE mr.record_id = $1`, [
-    recordId
-  ]);
+  const { rows } = await pool.query(
+    `
+    SELECT *
+    FROM vw_medical_records
+    WHERE record_id = $1
+    `,
+    [recordId]
+  );
   if (!rows[0]) return null;
-  const assignees = await getStaffsByRecordId(recordId);
-  return mapMedicalRecord(rows[0], assignees);
+  return mapMedicalRecord(rows[0]);
 }
 
 async function getMedicalRecordsByPatientId(patientId) {
   const { rows } = await pool.query(
-    `${baseSelect} WHERE mr.patient_id = $1 ORDER BY mr.created_at DESC`,
+    `
+    SELECT *
+    FROM vw_medical_records
+    WHERE patient_id = $1
+    ORDER BY created_at DESC
+    `,
     [patientId]
   );
-  const recordsWithAssignees = await Promise.all(
-    rows.map(async (row) => {
-      const assignees = await getStaffsByRecordId(row.record_id);
-      return mapMedicalRecord(row, assignees);
-    })
-  );
-  return recordsWithAssignees;
+
+  return rows.map(mapMedicalRecord);
 }
+
 
 async function createMedicalRecord({
   appointmentId = null,
@@ -78,7 +70,8 @@ async function createMedicalRecord({
   diagnosis,
   symptoms,
   prescriptions,
-  remarks
+  remarks,
+  assignees = []
 }) {
   const { rows } = await pool.query(
     `INSERT INTO medical_records (
@@ -89,11 +82,12 @@ async function createMedicalRecord({
        diagnosis,
        symptoms,
        prescriptions,
-       remarks
+       remarks,
+       assignees
      )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING record_id`,
-    [appointmentId, doctorId, patientId, dateTime, diagnosis, symptoms, prescriptions, remarks]
+    [appointmentId, doctorId, patientId, dateTime, diagnosis, symptoms, prescriptions, remarks, assignees]
   );
 
   return getMedicalRecordById(rows[0].record_id);
@@ -106,7 +100,8 @@ async function updateMedicalRecord(recordId, {
   prescriptions,
   remarks,
   dateTime,
-  assignees
+  assignees,
+  lastAmendedBy
 }) {
   const { rows } = await pool.query(
     `UPDATE medical_records
@@ -115,51 +110,18 @@ async function updateMedicalRecord(recordId, {
          prescriptions = $3,
          remarks = $4,
          date_time = $5,
-         updated_at = NOW()
+         last_amended_at = NOW(),
+         last_amended_by = $7,
+         assignees = $8,
+         current_version = COALESCE(current_version, 1) + 1
      WHERE record_id = $6
      RETURNING record_id`,
-    [diagnosis, symptoms, prescriptions, remarks, dateTime, recordId]
+    [diagnosis, symptoms, prescriptions, remarks, dateTime, recordId, lastAmendedBy || null, assignees || []]
   );
-  assignStaffsToRecord(recordId, assignees);
   return rows[0] ? getMedicalRecordById(rows[0].record_id) : null;
 }
 
 
-async function getStaffsByRecordId(recordId) {
-  const { rows } = await pool.query(
-    `SELECT s.staff_id,
-            s.name_surname
-     FROM assignees a
-     JOIN staffs s ON s.staff_id = a.staff_id
-     WHERE a.record_id = $1`,
-    [recordId]
-  );
-
-  return rows.map((row) => ({
-    staffId: row.staff_id,
-    nameSurname: row.name_surname
-  }));
-}
-
-async function assignStaffsToRecord(recordId, staffIds) {
-  await pool.query('DELETE FROM assignees WHERE record_id = $1', [
-    recordId
-  ]);
-
-  if (Array.isArray(staffIds) && staffIds.length > 0) {
-    const values = staffIds
-      .map((_, index) => `($1, $${index + 2})`)
-      .join(', ');
-
-    await pool.query(
-      `INSERT INTO assignees (record_id, staff_id)
-       VALUES ${values}`,
-      [recordId, ...staffIds]
-    );
-  }
-
-  return getStaffsByRecordId(recordId);
-}
 
 module.exports = {
   getMedicalRecords,
@@ -167,6 +129,4 @@ module.exports = {
   getMedicalRecordsByPatientId,
   createMedicalRecord,
   updateMedicalRecord,
-  getStaffsByRecordId,
-  assignStaffsToRecord
 };

@@ -9,7 +9,6 @@ const {
 
 const { getAppointmentById,updateAppointment} = require('../models/appointment');
 
-const { getStaffsByRecordId, assignStaffsToRecord} = require('../models/assignees');
 
 const handleError = (res, error) => {
   console.error(error);
@@ -92,9 +91,9 @@ const createMedicalRecordHandler = async (req, res) => {
         symptoms,
         prescriptions,
         remarks,
+        assignees
       });
 
-      const staffs = await assignStaffsToRecord(medicalRecord.recordId, assignees);
 
       // If appointment is scheduled, update it to completed (pass full appointment so other columns are not set to null)
       if (appointment.status === 'scheduled') {
@@ -119,7 +118,8 @@ const createMedicalRecordHandler = async (req, res) => {
       diagnosis,
       symptoms,
       prescriptions,
-      remarks
+      remarks,
+      assignees
     });
 
     res.status(201).json(medicalRecord);
@@ -149,29 +149,6 @@ const updateMedicalRecordHandler = async (req, res) => {
   }
 };
 
-const assignStaffsHandler = async (req, res) => {
-  try {
-    const { staffIds } = req.body;
-    
-    if (!Array.isArray(staffIds)) {
-      return res.status(400).json({ error: 'staffIds must be an array' });
-    }
-
-    const staffs = await assignStaffsToRecord(req.params.medicalRecordId, staffIds);
-    res.json({ staffs });
-  } catch (error) {
-    handleError(res, error);
-  }
-};
-
-const getAssignedStaffsHandler = async (req, res) => {
-  try {
-    const staffs = await getStaffsByRecordId(req.params.medicalRecordId);
-    res.json({ staffs });
-  } catch (error) {
-    handleError(res, error);
-  }
-};
 
 module.exports = {
   getMedicalRecordList,
@@ -179,6 +156,4 @@ module.exports = {
   getMedicalRecordsByPatientId: getMedicalRecordsByPatientIdHandler,
   createMedicalRecord: createMedicalRecordHandler,
   updateMedicalRecord: updateMedicalRecordHandler,
-  assignStaffs: assignStaffsHandler,
-  getAssignedStaffs: getAssignedStaffsHandler
 };
