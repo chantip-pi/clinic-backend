@@ -10,7 +10,7 @@ const mapMeridians = (row) => ({
 
 const getMeridians = async () => {
   const { rows } = await pool.query(
-    `SELECT meridian_id, meridian_name, region, side, image FROM meridian ORDER BY meridian_id DESC`
+    `SELECT meridian_id, meridian_name, region, side, image FROM meridian ORDER BY meridian_id ASC`
   );
   return rows.map(mapMeridians);
 };
