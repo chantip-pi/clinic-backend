@@ -2,6 +2,7 @@ const {
   getAcupoints,
   getAcupointByCode,
   createAcupoint,
+  updateAcupoint,
   deleteAcupoint
 } = require('../models/acupoint');
 
@@ -21,7 +22,7 @@ const listAcupoints = async (req, res) => {
 
 const getAcupointByCodeHandler = async (req, res) => {
   try {
-    const acupoint = await getAcupointByCode(req.params.acupunctureCode);
+    const acupoint = await getAcupointByCode(req.params.acupointCode);
     if (!acupoint) {
       return res.status(404).json({ error: 'Acupuncture point not found' });
     }
@@ -40,9 +41,21 @@ const addAcupoint = async (req, res) => {
   }
 };
 
+const editAcupoint = async (req, res) => {
+  try {
+    const acupoint = await updateAcupoint(req.params.acupointCode, req.body);
+    if (!acupoint) {
+      return res.status(404).json({ error: 'Acupuncture Point not found' });
+    }
+    res.json(acupoint);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 const removeAcupoint = async (req, res) => {
   try {
-    const deleted = await deleteAcupoint(req.params.acupunctureCode);
+    const deleted = await deleteAcupoint(req.params.acupointCode);
     if (!deleted) {
       return res.status(404).json({ error: 'Acupuncture Point not found' });
     }
@@ -56,5 +69,6 @@ module.exports = {
   listAcupoints,
   getAcupointByCode: getAcupointByCodeHandler,
   addAcupoint,
+  editAcupoint,
   removeAcupoint
 };
