@@ -9,7 +9,7 @@ const mapIllnesses = (row) => ({
 
 const getIllnesses = async () => {
   const { rows } = await pool.query(
-    `SELECT illness_id, illness_name, description, category FROM illness ORDER BY illness_id DESC`
+    `SELECT illness_id, illness_name, description, category FROM illness ORDER BY illness_id ASC`
   );
   return rows.map(mapIllnesses);
 };

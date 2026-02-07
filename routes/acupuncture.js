@@ -2,6 +2,8 @@ const express = require("express");
 const {
   listAcupunctures,
   getAcupunctureById,
+  getAcupuncturesByMeridianId,
+  getAcupuncturesByRegionAndSide,
   addAcupuncture,
   editAcupuncture,
   removeAcupuncture,
@@ -11,6 +13,8 @@ const router = express.Router();
 
 router.get("/acupunctures", listAcupunctures);
 router.get("/acupunctures/:acupunctureId", getAcupunctureById);
+router.get("/acupunctures/meridian/:meridianId", getAcupuncturesByMeridianId);
+router.get("/acupunctures/region/:region/side/:side", getAcupuncturesByRegionAndSide);
 router.post("/acupunctures", addAcupuncture);
 router.put("/acupunctures/:acupunctureId", editAcupuncture);
 router.delete("/acupunctures/:acupunctureId", removeAcupuncture);
