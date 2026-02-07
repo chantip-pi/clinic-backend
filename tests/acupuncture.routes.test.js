@@ -11,8 +11,6 @@ jest.mock("../models/acupuncture", () => ({
 }));
 
 const app = require("../app");
-const { get } = require("../routes");
-const { getAcupuncturesByRegionAndSide } = require("../controllers/acupuncture");
 
 describe("Acupuncture routes", () => {
   it("GET /api/acupunctures should list acupunctures", async () => {
