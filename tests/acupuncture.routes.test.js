@@ -3,12 +3,16 @@ const request = require("supertest");
 jest.mock("../models/acupuncture", () => ({
   getAcupunctures: jest.fn().mockResolvedValue([{ acupunctureId: 1, acupunctureCode: "LU1", meridianId: 1 },]),
   getAcupunctureById: jest.fn().mockResolvedValue({ acupunctureId: 1,acupunctureCode: "LU1",meridianId: 1,}),
+  getAcupuncturesByMeridianId: jest.fn().mockResolvedValue([{ acupunctureId: 1, acupunctureCode: "LU1", meridianId: 1 },]),
+  getAcupuncturesByRegionAndSide: jest.fn().mockResolvedValue([{ acupunctureId: 1, acupunctureCode: "LU1", meridianId: 1 },]),
   createAcupuncture: jest.fn().mockResolvedValue({acupunctureId: 2,acupunctureCode: "LU2",meridianId: 1,}),
   updateAcupuncture: jest.fn().mockResolvedValue({acupunctureId: 1,acupunctureCode: "LU1",meridianId: 1,}),
   deleteAcupuncture: jest.fn().mockResolvedValue(true),
 }));
 
 const app = require("../app");
+const { get } = require("../routes");
+const { getAcupuncturesByRegionAndSide } = require("../controllers/acupuncture");
 
 describe("Acupuncture routes", () => {
   it("GET /api/acupunctures should list acupunctures", async () => {
@@ -21,6 +25,18 @@ describe("Acupuncture routes", () => {
     const res = await request(app).get("/api/acupunctures/1");
     expect(res.status).toBe(200);
     expect(res.body.acupunctureId).toBe(1);
+  });
+
+  it("GET /api/acupunctures/meridian/:meridianId should return acupunctures by meridian", async () => {
+    const res = await request(app).get("/api/acupunctures/meridian/1");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it("GET /api/acupunctures/region/:region/side/:side should return acupunctures by region and side", async () => {
+    const res = await request(app).get("/api/acupunctures/region/arm/side/left");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
   });
 
   it("POST /api/acupunctures should create acupuncture", async () => {

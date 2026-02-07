@@ -3,24 +3,54 @@ const { pool } = require("../config/database");
 const mapAcupuncture = (row) => ({
   acupunctureId: row.acupuncture_id,
   acupointCode: row.acupoint_code,
+  acupointName: row.acupoint_name,
+  locationId: row.location_id,
+  pointLeft: row.point_left,
+  pointTop: row.point_top,
   meridianId: row.meridian_id,
+  meridianName: row.meridian_name,
+  region: row.region,
+  side: row.side,
+  image: row.image,
 });
 
 const getAcupunctures = async () => {
   const { rows } = await pool.query(
-    `SELECT acupuncture_id, acupoint_code, meridian_id FROM acupuncture ORDER BY acupuncture_id DESC`
+    `SELECT * FROM vw_acupuncture ORDER BY acupuncture_id ASC`,
   );
   return rows.map(mapAcupuncture);
 };
 
 const getAcupunctureById = async (acupunctureId) => {
   const { rows } = await pool.query(
-    `SELECT acupuncture_id, acupoint_code, meridian_id
-         FROM acupuncture
-            WHERE acupuncture_id = $1`,
-    [acupunctureId]
+    `SELECT * 
+      FROM vw_acupuncture 
+      WHERE acupuncture_id = $1`,
+    [acupunctureId],
   );
   return rows[0] ? mapAcupuncture(rows[0]) : null;
+};
+
+const getAcupuncturesByMeridianId = async (meridianId) => {
+  const { rows } = await pool.query(
+    `SELECT *
+      FROM vw_acupuncture
+      WHERE meridian_id = $1
+      ORDER BY acupuncture_id ASC`,
+    [meridianId],
+  );
+  return rows.map(mapAcupuncture);
+};
+
+const getAcupuncturesByRegionAndSide = async (region, side) => {
+  const { rows } = await pool.query(
+    `SELECT *
+      FROM vw_acupuncture
+      WHERE LOWER(region) = $1 AND LOWER(side) = $2
+      ORDER BY acupuncture_id ASC`,
+    [region, side],
+  );
+  return rows.map(mapAcupuncture);
 };
 
 const createAcupuncture = async ({ acupointCode, meridianId }) => {
@@ -32,14 +62,14 @@ const createAcupuncture = async ({ acupointCode, meridianId }) => {
         RETURNING acupuncture_id,
                 acupoint_code,
                 meridian_id`,
-    [acupointCode, meridianId]
+    [acupointCode, meridianId],
   );
   return mapAcupuncture(rows[0]);
 };
 
 const updateAcupuncture = async (
   acupunctureId,
-  { acupointCode, meridianId }
+  { acupointCode, meridianId },
 ) => {
   const { rows } = await pool.query(
     `UPDATE acupuncture
@@ -49,7 +79,7 @@ const updateAcupuncture = async (
         RETURNING acupuncture_id,
                 acupoint_code,
                 meridian_id`,
-    [acupointCode, meridianId, acupunctureId]
+    [acupointCode, meridianId, acupunctureId],
   );
   return rows[0] ? mapAcupuncture(rows[0]) : null;
 };
@@ -57,7 +87,7 @@ const updateAcupuncture = async (
 const deleteAcupuncture = async (acupunctureId) => {
   const { rowCount } = await pool.query(
     "DELETE FROM acupuncture WHERE acupuncture_id = $1",
-    [acupunctureId]
+    [acupunctureId],
   );
   return rowCount > 0;
 };
@@ -65,6 +95,8 @@ const deleteAcupuncture = async (acupunctureId) => {
 module.exports = {
   getAcupunctures,
   getAcupunctureById,
+  getAcupuncturesByMeridianId,
+  getAcupuncturesByRegionAndSide,
   createAcupuncture,
   updateAcupuncture,
   deleteAcupuncture,

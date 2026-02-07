@@ -1,6 +1,8 @@
 const {
   getAcupunctures,
   getAcupunctureById,
+  getAcupuncturesByMeridianId,
+  getAcupuncturesByRegionAndSide,
   createAcupuncture,
   updateAcupuncture,
   deleteAcupuncture,
@@ -32,6 +34,27 @@ const getAcupunctureByIdHandler = async (req, res) => {
   }
 };
 
+const getAcupuncturesByMeridianIdHandler = async (req, res) => {
+  try {
+    const acupunctures = await getAcupuncturesByMeridianId(
+      req.params.meridianId,
+    );
+    res.json(acupunctures);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const getAcupuncturesByRegionAndSideHandler = async (req, res) => {
+  try {
+    const { region, side } = req.params;
+    const acupunctures = await getAcupuncturesByRegionAndSide(region, side);
+    res.json(acupunctures);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 const addAcupuncture = async (req, res) => {
   try {
     const acupuncture = await createAcupuncture(req.body);
@@ -45,7 +68,7 @@ const editAcupuncture = async (req, res) => {
   try {
     const acupuncture = await updateAcupuncture(
       req.params.acupunctureId,
-      req.body
+      req.body,
     );
     if (!acupuncture) {
       return res.status(404).json({ error: "Acupuncture not found" });
@@ -71,6 +94,8 @@ const removeAcupuncture = async (req, res) => {
 module.exports = {
   listAcupunctures,
   getAcupunctureById: getAcupunctureByIdHandler,
+  getAcupuncturesByMeridianId: getAcupuncturesByMeridianIdHandler,
+  getAcupuncturesByRegionAndSide: getAcupuncturesByRegionAndSideHandler,
   addAcupuncture,
   editAcupuncture,
   removeAcupuncture,
