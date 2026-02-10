@@ -3,6 +3,7 @@ const request = require('supertest');
 jest.mock('../models/meridian', () => ({
     getMeridians: jest.fn().mockResolvedValue([{ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }]),
     getMeridianById: jest.fn().mockResolvedValue({ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }),
+    getMeridiansByRegionAndSide: jest.fn().mockResolvedValue({ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }),
     getMeridianRegion: jest.fn().mockResolvedValue([{ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }]),
     getMeridianSidesByRegion: jest.fn().mockResolvedValue([{ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }]),
     createMeridian: jest.fn().mockResolvedValue({ meridianId: 2, meridianName: 'Large Intestine', region: 'Head', side: 'Right', image: 'large_intestine.png' }),
@@ -23,6 +24,13 @@ describe("Meridian routes", () => {
     const res = await request(app).get("/api/meridians/meridian/1");
     expect(res.status).toBe(200);
     expect(res.body.meridianId).toBe(1);
+  });
+
+  it("GET /api/meridians/region/:region/side/:side should return all meridian by region and side", async () => {
+    const res = await request(app).get("/api/meridians/region/Head/side/Left");
+    expect(res.status).toBe(200);
+    expect(res.body.region).toBe("Head");
+    expect(res.body.side).toBe("Left");
   });
 
   it("GET /api/meridians/regions should list all regions in meridian", async () => {

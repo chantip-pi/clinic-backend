@@ -1,6 +1,7 @@
 const {
   getMeridians,
   getMeridianById,
+  getMeridiansByRegionAndSide,
   getMeridianRegion,
   getMeridianSidesByRegion,
   createMeridian,
@@ -28,6 +29,16 @@ const getMeridianByIdHandler = async (req, res) => {
     if (!meridian) {
       return res.status(404).json({ error: "Meridian not found" });
     }
+    res.json(meridian);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const getMeridiansByRegionAndSideHandler = async (req, res) => {
+  try {
+    const { region, side } = req.params;
+    const meridian = await getMeridiansByRegionAndSide(region, side);
     res.json(meridian);
   } catch (error) {
     handleError(res, error);
@@ -91,6 +102,7 @@ const removeMeridian = async (req, res) => {
 module.exports = {
   listMeridians,
   getMeridianById: getMeridianByIdHandler,
+  getMeridiansByRegionAndSide: getMeridiansByRegionAndSideHandler,
   getMeridianRegion: getMeridianRegionHandler,
   getMeridianSidesByRegion: getMeridianSidesByRegionHandler,
   addMeridian,

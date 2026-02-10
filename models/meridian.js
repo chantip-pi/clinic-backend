@@ -25,6 +25,16 @@ const getMeridianById = async (meridianId) => {
   return rows[0] ? mapMeridians(rows[0]) : null;
 };
 
+const getMeridiansByRegionAndSide = async (region, side) => {
+  const { rows } = await pool.query(
+    `SELECT meridian_id, meridian_name, LOWER(region) AS region, LOWER(side) AS side, image
+      FROM meridian
+      WHERE LOWER(region) = ANY($1) AND LOWER(side) = ANY($2)`,
+    [region, side]
+  );
+  return rows.map(mapMeridians);
+};
+
 const getMeridianRegion = async () => {
   const { rows } = await pool.query(
     `SELECT DISTINCT region FROM meridian`
@@ -104,6 +114,7 @@ const deleteMeridian = async (meridianId) => {
 module.exports = {
   getMeridians,
   getMeridianById,
+  getMeridiansByRegionAndSide,
   getMeridianRegion,
   getMeridianSidesByRegion,
   createMeridian,
