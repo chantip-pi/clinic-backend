@@ -11,6 +11,7 @@ const meridianRoutes = require('./meridian');
 const geminiRoutes = require('./gemini');
 const imageRoutes = require('./images');
 const medicalRecordAcupunctureRoutes = require('./medicalRecordAcupuncture');
+const illnessAcupunctureRoutes = require('./illnessAcupuncture');
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.use('/', meridianRoutes);
 router.use('/', geminiRoutes);
 router.use('/', imageRoutes);
 router.use('/', medicalRecordAcupunctureRoutes);
+router.use('/', illnessAcupunctureRoutes);
 
 module.exports = router;
 
