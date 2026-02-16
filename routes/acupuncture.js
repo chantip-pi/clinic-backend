@@ -3,6 +3,7 @@ const {
   listAcupunctures,
   getAcupunctureById,
   getAcupuncturesByMeridianId,
+  getAcupuncturesByMeridianName,
   getAcupuncturesByRegionAndSide,
   addAcupuncture,
   editAcupuncture,
@@ -14,6 +15,7 @@ const router = express.Router();
 router.get("/acupunctures", listAcupunctures);
 router.get("/acupunctures/:acupunctureId", getAcupunctureById);
 router.get("/acupunctures/meridian/:meridianId", getAcupuncturesByMeridianId);
+router.get("/acupunctures/meridianName/:meridianName", getAcupuncturesByMeridianName);
 router.get("/acupunctures/region/:region/side/:side", getAcupuncturesByRegionAndSide);
 router.post("/acupunctures", addAcupuncture);
 router.put("/acupunctures/:acupunctureId", editAcupuncture);

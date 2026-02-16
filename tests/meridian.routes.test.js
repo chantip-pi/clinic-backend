@@ -2,6 +2,7 @@ const request = require('supertest');
 
 jest.mock('../models/meridian', () => ({
     getMeridians: jest.fn().mockResolvedValue([{ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }]),
+    getUniqueMeridianNames: jest.fn().mockResolvedValue(['Lung', 'Large Intestine']),
     getMeridianById: jest.fn().mockResolvedValue({ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }),
     getMeridiansByRegionAndSide: jest.fn().mockResolvedValue({ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }),
     getMeridianRegion: jest.fn().mockResolvedValue([{ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }]),
@@ -16,6 +17,12 @@ const app = require('../app');
 describe("Meridian routes", () => {
   it("GET /api/meridians should list meridians", async () => {
     const res = await request(app).get("/api/meridians");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it("GET /api/meridians/names should list unique meridian names", async () => {
+    const res = await request(app).get("/api/meridians/names");
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });

@@ -42,6 +42,17 @@ const getAcupuncturesByMeridianId = async (meridianId) => {
   return rows.map(mapAcupuncture);
 };
 
+const getAcupuncturesByMeridianName = async (meridianName) => {
+  const { rows } = await pool.query(
+    `SELECT *
+      FROM vw_acupuncture
+      WHERE meridian_name = $1
+      ORDER BY acupuncture_id ASC`,
+    [meridianName],
+  );
+  return rows.map(mapAcupuncture);
+};
+
 const getAcupuncturesByRegionAndSide = async (region, side) => {
   const { rows } = await pool.query(
     `SELECT *
@@ -96,6 +107,7 @@ module.exports = {
   getAcupunctures,
   getAcupunctureById,
   getAcupuncturesByMeridianId,
+  getAcupuncturesByMeridianName,
   getAcupuncturesByRegionAndSide,
   createAcupuncture,
   updateAcupuncture,

@@ -2,6 +2,7 @@ const {
   getAcupunctures,
   getAcupunctureById,
   getAcupuncturesByMeridianId,
+  getAcupuncturesByMeridianName,
   getAcupuncturesByRegionAndSide,
   createAcupuncture,
   updateAcupuncture,
@@ -38,6 +39,17 @@ const getAcupuncturesByMeridianIdHandler = async (req, res) => {
   try {
     const acupunctures = await getAcupuncturesByMeridianId(
       req.params.meridianId,
+    );
+    res.json(acupunctures);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const getAcupuncturesByMeridianNameHandler = async (req, res) => {
+  try {
+    const acupunctures = await getAcupuncturesByMeridianName(
+      req.params.meridianName,
     );
     res.json(acupunctures);
   } catch (error) {
@@ -96,6 +108,7 @@ module.exports = {
   getAcupunctureById: getAcupunctureByIdHandler,
   getAcupuncturesByMeridianId: getAcupuncturesByMeridianIdHandler,
   getAcupuncturesByRegionAndSide: getAcupuncturesByRegionAndSideHandler,
+  getAcupuncturesByMeridianName: getAcupuncturesByMeridianNameHandler,
   addAcupuncture,
   editAcupuncture,
   removeAcupuncture,
