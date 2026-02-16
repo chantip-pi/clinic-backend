@@ -15,6 +15,18 @@ const getMeridians = async () => {
   return rows.map(mapMeridians);
 };
 
+const getUniqueMeridianNames = async () => {
+  const { rows } = await pool.query(
+    `SELECT DISTINCT meridian_name
+     FROM meridian
+     ORDER BY meridian_name ASC`
+  );
+
+  return rows.map(r => r.meridian_name);
+};
+
+
+
 const getMeridianById = async (meridianId) => {
   const { rows } = await pool.query(
     `SELECT meridian_id, meridian_name, region, side, image
@@ -113,6 +125,7 @@ const deleteMeridian = async (meridianId) => {
 
 module.exports = {
   getMeridians,
+  getUniqueMeridianNames,
   getMeridianById,
   getMeridiansByRegionAndSide,
   getMeridianRegion,

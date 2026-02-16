@@ -1,5 +1,6 @@
 const {
   getMeridians,
+  getUniqueMeridianNames,
   getMeridianById,
   getMeridiansByRegionAndSide,
   getMeridianRegion,
@@ -18,6 +19,14 @@ const listMeridians = async (req, res) => {
   try {
     const meridians = await getMeridians();
     res.json(meridians);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+const getUniqueMeridianNamesHandler = async (req, res) => {
+  try {
+    const names = await getUniqueMeridianNames();
+    res.json(names);
   } catch (error) {
     handleError(res, error);
   }
@@ -101,6 +110,7 @@ const removeMeridian = async (req, res) => {
 
 module.exports = {
   listMeridians,
+  getUniqueMeridianNames: getUniqueMeridianNamesHandler,
   getMeridianById: getMeridianByIdHandler,
   getMeridiansByRegionAndSide: getMeridiansByRegionAndSideHandler,
   getMeridianRegion: getMeridianRegionHandler,
