@@ -4,6 +4,7 @@ jest.mock("../models/acupuncture", () => ({
   getAcupunctures: jest.fn().mockResolvedValue([{ acupunctureId: 1, acupunctureCode: "LU1", meridianId: 1 },]),
   getAcupunctureById: jest.fn().mockResolvedValue({ acupunctureId: 1,acupunctureCode: "LU1",meridianId: 1,}),
   getAcupuncturesByMeridianId: jest.fn().mockResolvedValue([{ acupunctureId: 1, acupunctureCode: "LU1", meridianId: 1 },]),
+  getAcupuncturesByMeridianName: jest.fn().mockResolvedValue([{ acupunctureId: 1, acupunctureCode: "LU1", meridianId: 1 },]),
   getAcupuncturesByRegionAndSide: jest.fn().mockResolvedValue([{ acupunctureId: 1, acupunctureCode: "LU1", meridianId: 1 },]),
   createAcupuncture: jest.fn().mockResolvedValue({acupunctureId: 2,acupunctureCode: "LU2",meridianId: 1,}),
   updateAcupuncture: jest.fn().mockResolvedValue({acupunctureId: 1,acupunctureCode: "LU1",meridianId: 1,}),
@@ -27,6 +28,12 @@ describe("Acupuncture routes", () => {
 
   it("GET /api/acupunctures/meridian/:meridianId should return acupunctures by meridian", async () => {
     const res = await request(app).get("/api/acupunctures/meridian/1");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it("GET /api/acupunctures/meridian/:meridianName should return acupunctures by meridian name", async () => {
+    const res = await request(app).get("/api/acupunctures/meridian/Lung");
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
