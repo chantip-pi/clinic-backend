@@ -15,7 +15,7 @@ function getPrimaryModel() {
   if (!primaryModel) {
     primaryModel = genAI.getGenerativeModel({
       model: PRIMARY_MODEL_ID,
-    //  systemInstruction: SYSTEM_PROMPT,
+    systemInstruction: SYSTEM_PROMPT,
     });
   }
   return primaryModel;
@@ -25,7 +25,6 @@ function getFallbackModel() {
   if (!fallbackModel) {
     fallbackModel = genAI.getGenerativeModel({
       model: FALLBACK_MODEL_ID,
-    //  systemInstruction: SYSTEM_PROMPT,
     });
   }
   return fallbackModel;
