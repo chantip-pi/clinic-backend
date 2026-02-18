@@ -1,129 +1,165 @@
 const express = require('express');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const streamifier = require('streamifier');
 const path = require('path');
-const fs = require('fs');
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../images'));
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename to avoid conflicts
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Cloudinary is auto-configured from CLOUDINARY_URL env variable
 
-// File filter to allow only images
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files are allowed!'), false);
-  }
-};
-
+// Use memory storage — no disk writing
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  },
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
   }
 });
 
-// GET /api/images - List all images
-router.get('/images', (req, res) => {
-  const imagesDir = path.join(__dirname, '../images');
+// Helper: upload buffer to Cloudinary using the original filename as public_id
+const uploadToCloudinary = (buffer, originalname) => {
+  // Strip extension — Cloudinary stores public_id without extension
+  const nameWithoutExt = path.basename(originalname, path.extname(originalname));
 
-  fs.readdir(imagesDir, (err, files) => {
-    if (err) {
-      return res.status(500).json({ error: 'Unable to read images directory' });
-    }
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'images',
+        public_id: nameWithoutExt,   // ✅ preserve original filename
+        overwrite: false,            // don't silently overwrite existing files
+        use_filename: true,
+        unique_filename: false,      // ✅ don't append random suffix
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
 
-    // Filter only image files
-    const imageFiles = files.filter(file => {
-      const ext = path.extname(file).toLowerCase();
-      return ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(ext);
+// GET /api/images - List all images from Cloudinary
+router.get('/images', async (req, res) => {
+  try {
+    const result = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: 'images/',
+      max_results: 100,
     });
 
-    res.json({ images: imageFiles });
-  });
+    const images = result.resources.map((r) => {
+      const parts = r.public_id.split('/');
+      const name = parts[parts.length - 1];
+      return `${name}.${r.format}`;
+    });
+
+    res.json({ images });
+  } catch (err) {
+    console.error('Cloudinary list error:', err);
+    res.status(500).json({ error: 'Unable to list images' });
+  }
 });
 
-// GET /api/images/:filename - Get specific image
-router.get('/images/:filename', (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(__dirname, '../images', filename);
-
-  // Check if file exists
-  if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
+// GET /api/images/:filename - Redirect to Cloudinary URL
+router.get('/images/:filename', async (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const publicId = `images/${filename.replace(/\.[^/.]+$/, '')}`;
+    const url = cloudinary.url(publicId, { secure: true });
+    res.redirect(url);
+  } catch (err) {
+    console.error('Cloudinary get error:', err);
     res.status(404).json({ error: 'Image not found' });
   }
 });
 
-// POST /api/images - Upload new image
-router.post('/images', upload.single('image'), (req, res) => {
+// POST /api/images - Upload new image to Cloudinary
+router.post('/images', upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No image file provided' });
   }
 
-  res.status(201).json({
-    message: 'Image uploaded successfully',
-    filename: req.file.filename,
-    originalName: req.file.originalname
-  });
+  try {
+    const result = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+
+    // Reconstruct filename with extension from Cloudinary result
+    const parts = result.public_id.split('/');
+    const name = parts[parts.length - 1];
+    const filename = `${name}.${result.format}`;
+
+    res.status(201).json({
+      message: 'Image uploaded successfully',
+      filename,                          // e.g. "headFront.png"
+      originalName: req.file.originalname,
+      url: result.secure_url,
+    });
+  } catch (err) {
+    console.error('Cloudinary upload error:', err);
+    res.status(500).json({ error: 'Failed to upload image' });
+  }
 });
 
-// PUT /api/images/:filename - Replace existing image
-router.put('/images/:filename', upload.single('image'), (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(__dirname, '../images', filename);
-
-  // Check if file exists
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'Image not found' });
-  }
-
+// PUT /api/images/:filename - Replace existing image on Cloudinary
+router.put('/images/:filename', upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No image file provided' });
   }
 
-  // Delete old file
-  fs.unlinkSync(filePath);
+  try {
+    const filename = req.params.filename;
+    const publicId = `images/${filename.replace(/\.[^/.]+$/, '')}`;
 
-  // Rename new file to old filename
-  const newFilePath = path.join(__dirname, '../images', filename);
-  fs.renameSync(req.file.path, newFilePath);
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          public_id: publicId,
+          overwrite: true,           // ✅ explicitly replace
+          unique_filename: false,
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      streamifier.createReadStream(req.file.buffer).pipe(stream);
+    });
 
-  res.json({
-    message: 'Image updated successfully',
-    filename: filename
-  });
+    res.json({
+      message: 'Image updated successfully',
+      filename,
+      url: result.secure_url,
+    });
+  } catch (err) {
+    console.error('Cloudinary replace error:', err);
+    res.status(500).json({ error: 'Failed to replace image' });
+  }
 });
 
-// DELETE /api/images/:filename - Delete image
-router.delete('/images/:filename', (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(__dirname, '../images', filename);
+// DELETE /api/images/:filename - Delete image from Cloudinary
+router.delete('/images/:filename', async (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const publicId = `images/${filename.replace(/\.[^/.]+$/, '')}`;
 
-  // Check if file exists
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'Image not found' });
-  }
+    const result = await cloudinary.uploader.destroy(publicId);
 
-  // Delete file
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Unable to delete image' });
+    if (result.result === 'not found') {
+      return res.status(404).json({ error: 'Image not found' });
     }
 
     res.json({ message: 'Image deleted successfully' });
-  });
+  } catch (err) {
+    console.error('Cloudinary delete error:', err);
+    res.status(500).json({ error: 'Unable to delete image' });
+  }
 });
 
 module.exports = router;
