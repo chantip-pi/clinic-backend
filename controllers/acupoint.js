@@ -8,6 +8,23 @@ const {
 
 const handleError = (res, error) => {
   console.error(error);
+
+  // PostgreSQL unique constraint violation
+  if (error.code === '23505') {
+    const detail = error.detail || '';
+
+    if (detail.includes('acupoint_code')) {
+      return res.status(409).json({ error: 'Acupuncture point code is already exist' });
+    }
+
+    if (detail.includes('acupoint_name')) {
+      return res.status(409).json({ error: 'Acupuncture point name is already exist' });
+    }
+
+    // Fallback for any other unique constraint
+    return res.status(409).json({ error: 'An acupuncture point with these details already exists' });
+  }
+
   res.status(500).json({ error: 'Something went wrong' });
 };
 
