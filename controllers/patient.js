@@ -9,6 +9,19 @@ const {
 
 const handleError = (res, error) => {
   console.error(error);
+
+  // PostgreSQL unique constraint violation
+  if (error.code === '23505') {
+    const detail = error.detail || '';
+
+    if (detail.includes('phone_number')) {
+      return res.status(409).json({ error: 'Phone number is already in use' });
+    }
+
+    // Fallback for any other unique constraint
+    return res.status(409).json({ error: 'A patient with these details already exists' });
+  }
+
   res.status(500).json({ error: 'Something went wrong' });
 };
 

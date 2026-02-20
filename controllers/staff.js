@@ -10,10 +10,31 @@ const {
   deleteStaff
 } = require('../models/staff');
 
+
 const handleError = (res, error) => {
   console.error(error);
+
+  // PostgreSQL unique constraint violation
+  if (error.code === '23505') {
+    const detail = error.detail || '';
+
+    if (detail.includes('email')) {
+      return res.status(409).json({ error: 'Email address is already in use' });
+    }
+    if (detail.includes('phone_number')) {
+      return res.status(409).json({ error: 'Phone number is already in use' });
+    }
+    if (detail.includes('username')) {
+      return res.status(409).json({ error: 'Username is already in use' });
+    }
+
+    // Fallback for any other unique constraint
+    return res.status(409).json({ error: 'A staff member with these details already exists' });
+  }
+
   res.status(500).json({ error: 'Something went wrong' });
 };
+
 
 const listStaff = async (req, res) => {
   try {
