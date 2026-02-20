@@ -8,7 +8,20 @@ const {
 
 const handleError = (res, error) => {
   console.error(error);
-  res.status(500).json({ error: "Something went wrong" });
+
+  // PostgreSQL unique constraint violation
+  if (error.code === '23505') {
+    const detail = error.detail || '';
+
+    if (detail.includes('illness_name')) {
+      return res.status(409).json({ error: 'Illness name is already in use' });
+    }
+
+    // Fallback for any other unique constraint
+    return res.status(409).json({ error: 'An illness with this name already exists' });
+  }
+
+  res.status(500).json({ error: 'Something went wrong' });
 };
 
 const listIllnesses = async (req, res) => {
