@@ -49,7 +49,33 @@ function isError(err) {
 /**
  * Main execution function
  */
-async function execute(symptoms) {
+async function execute(symptoms, dbContext = null) {
+  // Build context string from database
+  let contextString = '';
+  if (dbContext) {
+    const { illnesses, meridianNames } = dbContext;
+    
+    contextString += '\n\n=== DATABASE CONTEXT ===\n';
+    
+    // Add illness information
+    if (illnesses && illnesses.length > 0) {
+      contextString += '\nAVAILABLE ILLNESSES:\n';
+      illnesses.forEach(illness => {
+        contextString += `- ID: ${illness.illnessId}, Name: ${illness.illnessName}, Description: ${illness.description}, Category: ${illness.category}\n`;
+      });
+    }
+    
+    // Add meridian information
+    if (meridianNames && meridianNames.length > 0) {
+      contextString += '\nAVAILABLE MERIDIANS:\n';
+      meridianNames.forEach(name => {
+        contextString += `- ${name}\n`;
+      });
+    }
+    
+    contextString += '\n=== END DATABASE CONTEXT ===\n';
+  }
+
   // 2️⃣ Build Gemini request
   const request = {
     contents: [
@@ -57,8 +83,7 @@ async function execute(symptoms) {
         role: 'user',
         parts: [
           {
-            text: `${SYSTEM_PROMPT}\nUSER SYMPTOMS: ${symptoms}`
-
+            text: `${SYSTEM_PROMPT}${contextString}\nUSER SYMPTOMS: ${symptoms}`
           }
         ]
       }
