@@ -2,16 +2,16 @@ const request = require("supertest");
 
 jest.mock("../models/medicalRecordAcupuncture", () => ({
   getMedicalRecordAcupunctures: jest.fn().mockResolvedValue([
-    { recordId: 1, acupunctureId: 1 },
-    { recordId: 1, acupunctureId: 2 },
+    { recordId: 1, acupunctureId: 1, lateralSide: "both" },
+    { recordId: 1, acupunctureId: 2, lateralSide: "both" },
   ]),
   getAcupuncturesByRecordId: jest.fn().mockResolvedValue([
-    { recordId: 1, acupunctureId: 1 },
-    { recordId: 1, acupunctureId: 2 },
+    { recordId: 1, acupunctureId: 1, lateralSide: "both" },
+    { recordId: 1, acupunctureId: 2, lateralSide: "both" },
   ]),
   createMedicalRecordAcupuncture: jest
     .fn()
-    .mockResolvedValue({ recordId: 1, acupunctureId: 3 }),
+    .mockResolvedValue({ recordId: 1, acupunctureId: 3, lateralSide: "both" }),
   deleteMedicalRecordAcupuncture: jest.fn().mockResolvedValue(true),
   deleteAllAcupuncturesForRecord: jest.fn().mockResolvedValue(true),
 }));
@@ -34,7 +34,7 @@ describe("Medical Record Acupuncture routes", () => {
   it("POST /api/medicalRecordAcupunctures/:recordId should create medical record acupuncture", async () => {
     const res = await request(app)
       .post("/api/medicalRecordAcupunctures/1")
-      .send({ acupunctureId: 3 });
+      .send({ acupunctureId: 3, lateralSide: "both" });
     expect(res.status).toBe(201);
     expect(res.body.acupunctureId).toBe(3);
   });

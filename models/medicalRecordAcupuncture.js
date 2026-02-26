@@ -3,11 +3,12 @@ const { pool } = require("../config/database");
 const mapMedicalRecordAcupuncture = (row) => ({
   recordId: row.record_id,
   acupunctureId: row.acupuncture_id,
+  lateralSide: row.lateral_side
 });
 
 const getMedicalRecordAcupunctures = async () => {
   const { rows } = await pool.query(
-    `SELECT record_id, acupuncture_id 
+    `SELECT record_id, acupuncture_id, lateral_side 
         FROM medical_record_acupuncture 
         ORDER BY record_id DESC`,
   );
@@ -16,7 +17,7 @@ const getMedicalRecordAcupunctures = async () => {
 
 const getAcupuncturesByRecordId = async (recordId) => {
   const { rows } = await pool.query(
-    `SELECT record_id, acupuncture_id
+    `SELECT record_id, acupuncture_id, lateral_side
      FROM medical_record_acupuncture
      WHERE record_id = $1`,
     [recordId]
@@ -24,15 +25,17 @@ const getAcupuncturesByRecordId = async (recordId) => {
   return rows.map(mapMedicalRecordAcupuncture);
 };
 
-const createMedicalRecordAcupuncture = async ({ recordId, acupunctureId }) => {
+const createMedicalRecordAcupuncture = async ({ recordId, acupunctureId, lateralSide }) => {
   const { rows } = await pool.query(
     `INSERT INTO medical_record_acupuncture (
             record_id,
-            acupuncture_id
-        )   VALUES ($1, $2) 
+            acupuncture_id,
+            lateral_side
+        )   VALUES ($1, $2, $3) 
         RETURNING record_id,
-                acupuncture_id`,
-    [recordId, acupunctureId],
+                acupuncture_id,
+                lateral_side`,
+    [recordId, acupunctureId, lateralSide],
   );
   return mapMedicalRecordAcupuncture(rows[0]);
 };
@@ -41,6 +44,7 @@ const updateMedicalRecordAcupuncture = async ({
   recordId,
   oldAcupunctureId,
   newAcupunctureId,
+  lateralSide,
 }) => {
   await pool.query(
     `DELETE FROM medical_record_acupuncture
@@ -51,11 +55,12 @@ const updateMedicalRecordAcupuncture = async ({
   const { rows } = await pool.query(
     `INSERT INTO medical_record_acupuncture (
       record_id,
-      acupuncture_id
+      acupuncture_id,
+      lateral_side,
     )
-    VALUES ($1, $2)
-    RETURNING record_id, acupuncture_id`,
-    [recordId, newAcupunctureId]
+    VALUES ($1, $2, $3)
+    RETURNING record_id, acupuncture_id, lateral_side`,
+    [recordId, newAcupunctureId, lateralSide]
   );
 
   return mapMedicalRecordAcupuncture(rows[0]);
