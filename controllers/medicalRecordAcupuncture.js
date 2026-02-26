@@ -35,12 +35,13 @@ const getMedicalRecordAcupuncturesByRecordIdHandler = async (req, res) => {
 const addMedicalRecordAcupuncture = async (req, res) => {
   try {
     const { recordId } = req.params;
-    const { acupunctureId } = req.body;
+    const { acupunctureId, lateralSide } = req.body;
 
     const medicalRecordAcupuncture =
       await createMedicalRecordAcupuncture({
         recordId,
         acupunctureId,
+        lateralSide
       });
 
     res.status(201).json(medicalRecordAcupuncture);
