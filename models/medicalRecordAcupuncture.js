@@ -31,7 +31,7 @@ const createMedicalRecordAcupuncture = async ({ recordId, acupunctureId, lateral
             record_id,
             acupuncture_id,
             lateral_side
-        )   VALUES ($1, $2) 
+        )   VALUES ($1, $2, $3) 
         RETURNING record_id,
                 acupuncture_id,
                 lateral_side`,
