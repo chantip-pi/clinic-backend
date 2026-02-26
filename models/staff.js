@@ -1,5 +1,6 @@
 const { pool } = require('../config/database');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const mapStaff = (row) => ({
   staffId: row.staff_id,
@@ -9,7 +10,8 @@ const mapStaff = (row) => ({
   birthday: row.birthday,
   gender: row.gender,
   email: row.email,
-  title: row.title
+  title: row.title,
+  token: row.token
 });
 
 const mapName = (row) => ({
@@ -21,7 +23,7 @@ const isBcryptHash = (s) => typeof s === 'string' && /^\$2[aby]\$/.test(s);
 
 const getStaff = async () => {
   const { rows } = await pool.query(
-    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title
+    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title, token
      FROM staffs
      ORDER BY staff_id DESC`
   );
@@ -30,7 +32,7 @@ const getStaff = async () => {
 
 const getStaffById = async (staffId) => {
   const { rows } = await pool.query(
-    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title
+    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title, token
      FROM staffs
      WHERE staff_id = $1`,
     [staffId]
@@ -40,7 +42,7 @@ const getStaffById = async (staffId) => {
 
 const getStaffByUsername = async (username) => {
   const { rows } = await pool.query(
-    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title
+    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title, token
      FROM staffs
      WHERE username = $1`,
     [username]
@@ -54,8 +56,8 @@ const getDoctorName = async () => {
      FROM staffs
      WHERE title = 'Doctor'`);
   return rows.map(mapName);
-};    
-  
+};
+
 const getStaffName = async () => {
   const { rows } = await pool.query(
     `SELECT staff_id, name_surname
@@ -78,11 +80,15 @@ const createStaff = async ({
   // If client sends plaintext, hash it here before storing.
   const passwordToStore = isBcryptHash(password) ? password : await bcrypt.hash(password, 10);
 
+  // Create user token
+  const token = jwt.sign({ id: username }, process.env.JWT_SECRET, { expiresIn: '2h' });
+
+
   const { rows } = await pool.query(
-    `INSERT INTO staffs (username, password, name_surname, phone_number, birthday, gender, email, title)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING staff_id, username, password, name_surname, phone_number, birthday, gender, email, title`,
-    [username, passwordToStore, nameSurname, phoneNumber, birthday, gender, email, title]
+    `INSERT INTO staffs (username, password, name_surname, phone_number, birthday, gender, email, title, token)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING staff_id, username, password, name_surname, phone_number, birthday, gender, email, title, token`,
+    [username, passwordToStore, nameSurname, phoneNumber, birthday, gender, email, title, token]
   );
   return mapStaff(rows[0]);
 };
@@ -117,11 +123,15 @@ const deleteStaff = async (staffId) => {
   return rowCount > 0;
 };
 
-const loginStaff = async ({username, password}) => {
-  // We first fetch the user by username and then verify the password.
+const loginStaff = async ({ username, password }) => {
+  if (!username || !password) {
+    throw new Error('Username and password are required');
+  }
+
   const { rows } = await pool.query(
-    `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title
-     FROM staffs
+    `SELECT staff_id, username, password, name_surname, phone_number, 
+            birthday, gender, email, title 
+     FROM staffs 
      WHERE username = $1`,
     [username]
   );
@@ -129,15 +139,21 @@ const loginStaff = async ({username, password}) => {
   const userRow = rows[0];
   if (!userRow) return null;
 
-  // If the client sent a bcrypt hash (starts with $2...), compare equality only.
-  // Note: bcrypt is one-way; hashes with different salts won't match even for same password.
-  if (isBcryptHash(password)) {
-    return password === userRow.password ? mapStaff(userRow) : null;
-  }
+  const isMatch = await bcrypt.compare(password, userRow.password);
+  if (!isMatch) return null;
 
-  // Otherwise assume plaintext and use bcrypt.compare against stored hash.
-  const match = await bcrypt.compare(password, userRow.password);
-  return match ? mapStaff(userRow) : null;
+  const token = jwt.sign(
+    { id: userRow.staff_id, username: userRow.username },
+    process.env.JWT_SECRET,
+    { expiresIn: '2h' }
+  );
+
+  await pool.query(
+    'UPDATE staffs SET token = $1 WHERE staff_id = $2',
+    [token, userRow.staff_id]
+  );
+
+  return mapStaff({ ...userRow, token });
 };
 
 module.exports = {
