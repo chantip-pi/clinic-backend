@@ -7,12 +7,13 @@ const {
   removeIllness,
 } = require("../controllers/illness");
 
+const auth = require("../middleware/auth");
 const router = express.Router();
 
-router.get("/illnesses", listIllnesses);
-router.get("/illnesses/:illnessId", getIllnessById);
-router.post("/illnesses", addIllness);
-router.put("/illnesses/:illnessId", editIllness);
-router.delete("/illnesses/:illnessId", removeIllness);
+router.get("/illnesses", auth, listIllnesses);
+router.get("/illnesses/:illnessId", auth, getIllnessById);
+router.post("/illnesses", auth, addIllness);
+router.put("/illnesses/:illnessId", auth, editIllness);
+router.delete("/illnesses/:illnessId", auth, removeIllness);
 
 module.exports = router;

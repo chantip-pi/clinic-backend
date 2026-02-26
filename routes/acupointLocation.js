@@ -7,12 +7,13 @@ const {
   removeAcupointLocation,
 } = require("../controllers/acupointLocation");
 
+const auth = require("../middleware/auth");
 const router = express.Router();
 
-router.get("/acupointLocations", listAcupointLocations);
-router.get("/acupointLocations/:locationId", getAcupointLocationById);
-router.post("/acupointLocations", addAcupointLocation);
-router.put("/acupointLocations/:locationId", editAcupointLocation);
-router.delete("/acupointLocations/:locationId", removeAcupointLocation);
+router.get("/acupointLocations", auth, listAcupointLocations);
+router.get("/acupointLocations/:locationId", auth, getAcupointLocationById);
+router.post("/acupointLocations", auth, addAcupointLocation);
+router.put("/acupointLocations/:locationId", auth, editAcupointLocation);
+router.delete("/acupointLocations/:locationId", auth, removeAcupointLocation);
 
 module.exports = router;
