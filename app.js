@@ -4,12 +4,13 @@ const cors = require('cors');
 const { logger, errorHandler } = require('./middleware');
 const routes = require('./routes');
 
+const FRONTEND_URL = process.env.USE_LOCALHOST === 'true' ? process.env.LOCAL_FRONTEND_URL : process.env.PROD_FRONTEND_URL;
+
 const app = express();
 
 app.use(
   cors({
-    origin: 'https://acupucture-clinic-system.vercel.app',
-   // origin: 'http://localhost:5173',
+   origin: FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
