@@ -1,5 +1,7 @@
 const request = require('supertest');
 
+jest.mock('../middleware/auth', () => (req, res, next) => next());
+
 jest.mock('../models/staff', () => ({
   getStaff: jest.fn().mockResolvedValue([{ staffId: 1, username: 'user1' }]),
   getStaffById: jest.fn().mockResolvedValue({ staffId: 1, username: 'user1' }),
