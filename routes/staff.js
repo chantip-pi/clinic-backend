@@ -17,7 +17,7 @@ const router = express.Router();
 router.get('/staff', listStaff);
 router.get('/staff/id/:staffId', getStaffById);
 router.get('/staff/username/:username', getStaffByUsername);
-router.get('/staff/login/:username/:password', loginStaff);
+router.post('/staff/login', loginStaff);
 router.get('/staff/doctors', getDoctorName);
 router.get('/staff/staffs', getStaffName);
 router.post('/staff', addStaff);
