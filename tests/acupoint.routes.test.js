@@ -1,10 +1,10 @@
 const request = require('supertest');
 
 jest.mock('../models/acupoint', () => ({
-  getAcupoints: jest.fn().mockResolvedValue([{ acupointCode: 'LU1', acupointName: 'Zhong Fu' }]),
-  getAcupointByCode: jest.fn().mockResolvedValue({ acupointCode: 'LU1', acupointName: 'Zhong Fu' }),
-  createAcupoint: jest.fn().mockResolvedValue({ acupointCode: 'LU2', acupointName: 'Yun Men' }),
-  updateAcupoint: jest.fn().mockResolvedValue({ acupointCode: 'LU1', acupointName: 'Zhong Fu' }),
+  getAcupoints: jest.fn().mockResolvedValue([{ acupointCode: 'LU1', acupointName: 'Zhong Fu', isBilateral: true }]),
+  getAcupointByCode: jest.fn().mockResolvedValue({ acupointCode: 'LU1', acupointName: 'Zhong Fu', isBilateral: true }),
+  createAcupoint: jest.fn().mockResolvedValue({ acupointCode: 'LU2', acupointName: 'Yun Men', isBilateral: true }),
+  updateAcupoint: jest.fn().mockResolvedValue({ acupointCode: 'LU1', acupointName: 'Zhong Fu', isBilateral: true }),
   deleteAcupoint: jest.fn().mockResolvedValue(true)
 }));
 
@@ -26,7 +26,7 @@ describe('Acupoint routes', () => {
   it('POST /api/acupoints should create acupoint', async () => {
     const res = await request(app)
       .post('/api/acupoints')
-      .send({ acupointName: 'Yun Men' });
+      .send({ acupointName: 'Yun Men', isBilateral: true });
     expect(res.status).toBe(201);
     expect(res.body.acupointName).toBe('Yun Men');
   });
@@ -34,7 +34,7 @@ describe('Acupoint routes', () => {
   it('PUT /api/acupoints/:acupointCode should update acupoint', async () => {
     const res = await request(app)
       .put('/api/acupoints/LU1')
-      .send({ acupointName: 'Zhong Fu' });
+      .send({ acupointName: 'Zhong Fu', isBilateral: true });
     expect(res.status).toBe(200);
     expect(res.body.acupointName).toBe('Zhong Fu');
   });
