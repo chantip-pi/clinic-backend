@@ -117,7 +117,7 @@ const deleteStaff = async (staffId) => {
   return rowCount > 0;
 };
 
-const loginStaff = async (username, password) => {
+const loginStaff = async ({username, password}) => {
   // We first fetch the user by username and then verify the password.
   const { rows } = await pool.query(
     `SELECT staff_id, username, password, name_surname, phone_number, birthday, gender, email, title

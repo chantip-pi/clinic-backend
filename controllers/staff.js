@@ -101,8 +101,8 @@ const removeStaff = async (req, res) => {
 
 const loginStaffHandler = async (req, res) => {
   try {
-    const staff = await loginStaff(req.params.username, req.params.password);
-    res.json(staff);
+    const staff = await loginStaff(req.body);
+    res.status(200).json(staff);
   } catch (error) {
     handleError(res, error);
   }

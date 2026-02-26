@@ -33,8 +33,8 @@ describe('Staff routes', () => {
     expect(res.body.username).toBe('user1');
   });
 
-  it('GET /api/staff/login/:username/:password should login staff', async () => {
-    const res = await request(app).get('/api/staff/login/user1/pass');
+  it('POST /api/staff/login should login staff', async () => {
+    const res = await request(app).post('/api/staff/login').send({ username: 'user1', password: 'pass' });
     expect(res.status).toBe(200);
     expect(res.body.username).toBe('user1');
   });
