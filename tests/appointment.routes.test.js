@@ -1,5 +1,7 @@
 const request = require('supertest');
 
+jest.mock('../middleware/auth', () => (req, res, next) => next());
+
 jest.mock('../models/appointment', () => ({
   getAppointments: jest.fn().mockResolvedValue([
     { appointmentId: 1, patientId: 1, appointmentDateTime: '2025-01-01T10:00:00Z' }

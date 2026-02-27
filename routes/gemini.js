@@ -3,9 +3,10 @@ const { execute } = require('../gemini/suggestion.service');
 const { getIllnesses } = require('../models/illness');
 const { getMeridians, getUniqueMeridianNames } = require('../models/meridian');
 
+const auth = require("../middleware/auth");
 const router = express.Router();
 
-router.post('/suggest', async (req, res, next) => {
+router.post('/suggest', auth, async (req, res, next) => {
   try {
     const { symptoms } = req.body;
     if (!symptoms || typeof symptoms !== 'string') {

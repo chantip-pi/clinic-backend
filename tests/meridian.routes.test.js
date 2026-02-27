@@ -1,5 +1,7 @@
 const request = require('supertest');
 
+jest.mock('../middleware/auth', () => (req, res, next) => next());
+
 jest.mock('../models/meridian', () => ({
     getMeridians: jest.fn().mockResolvedValue([{ meridianId: 1, meridianName: 'Lung', region: 'Head', side: 'Left', image: 'lung.png' }]),
     getUniqueMeridianNames: jest.fn().mockResolvedValue(['Lung', 'Large Intestine']),

@@ -1,5 +1,7 @@
 const request = require('supertest');
 
+jest.mock('../middleware/auth', () => (req, res, next) => next());
+
 jest.mock('../models/patient', () => ({
   getPatients: jest.fn().mockResolvedValue([{ patientId: 1, nameSurname: 'John Doe' }]),
   getPatientsByAppointmentDate: jest
@@ -8,7 +10,7 @@ jest.mock('../models/patient', () => ({
   getPatientById: jest.fn().mockResolvedValue({ patientId: 1, nameSurname: 'John Doe' }),
   createPatient: jest.fn().mockResolvedValue({ patientId: 2, nameSurname: 'Jane Doe' }),
   updatePatient: jest.fn().mockResolvedValue({ patientId: 1, nameSurname: 'John Updated' }),
-  deletePatient: jest.fn().mockResolvedValue(true)
+  deletePatient: jest.fn().mockResolvedValue(true),
 }));
 
 const app = require('../app');
@@ -53,5 +55,3 @@ describe('Patient routes', () => {
     expect(res.status).toBe(204);
   });
 });
-
-

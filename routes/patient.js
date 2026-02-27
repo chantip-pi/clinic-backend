@@ -8,14 +8,15 @@ const {
   removePatient
 } = require('../controllers/patient');
 
+const auth = require('../middleware/auth');
 const router = express.Router();
 
-router.get('/patients', listPatients);
-router.get('/patients/appointment/:appointmentDate', getPatientsByAppointmentDate);
-router.get('/patients/:patientId', getPatientById);
-router.post('/patients', addPatient);
-router.put('/patients/:patientId', editPatient);
-router.delete('/patients/:patientId', removePatient);
+router.get('/patients', auth, listPatients);
+router.get('/patients/appointment/:appointmentDate', auth, getPatientsByAppointmentDate);
+router.get('/patients/:patientId', auth, getPatientById);
+router.post('/patients', auth, addPatient);
+router.put('/patients/:patientId', auth, editPatient);
+router.delete('/patients/:patientId', auth, removePatient);
 
 module.exports = router;
 

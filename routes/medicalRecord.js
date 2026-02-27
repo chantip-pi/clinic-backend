@@ -8,12 +8,13 @@ const {
   getAssignedStaffs
 } = require('../controllers/medicalRecord');
 
+const auth = require("../middleware/auth");
 const router = express.Router();
 
-router.get('/medicalRecords', getMedicalRecordList);
-router.get('/medicalRecords/patient/:patientId', getMedicalRecordsByPatientId);
-router.get('/medicalRecords/:medicalRecordId', getMedicalRecordById);
-router.post('/medicalRecords', createMedicalRecord);
-router.put('/medicalRecords/update/:medicalRecordId', updateMedicalRecord);
+router.get('/medicalRecords', auth, getMedicalRecordList);
+router.get('/medicalRecords/patient/:patientId', auth, getMedicalRecordsByPatientId);
+router.get('/medicalRecords/:medicalRecordId', auth, getMedicalRecordById);
+router.post('/medicalRecords', auth, createMedicalRecord);
+router.put('/medicalRecords/update/:medicalRecordId', auth, updateMedicalRecord);
 
 module.exports = router;

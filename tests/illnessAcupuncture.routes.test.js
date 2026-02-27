@@ -1,5 +1,7 @@
 const request = require("supertest");
 
+jest.mock("../middleware/auth", () => (req, res, next) => next());
+
 jest.mock("../models/illnessAcupuncture", () => ({
   getIllnessAcupunctures: jest.fn().mockResolvedValue([{ illnessId: 1, acupunctureId: 1 }]),
   getAcupuncturesByIllnessId: jest.fn().mockResolvedValue([{ illnessId: 1, acupunctureId: 1 }]),

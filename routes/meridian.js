@@ -11,10 +11,11 @@ const {
   removeMeridian,
 } = require("../controllers/meridian");
 
+const auth = require("../middleware/auth");
 const router = express.Router();
 
-router.get("/meridians", listMeridians);
-router.get("/meridians/names", getUniqueMeridianNames);
+router.get("/meridians", auth, listMeridians);
+router.get("/meridians/names", auth, getUniqueMeridianNames);
 router.get("/meridians/meridian/:meridianId", getMeridianById);
 router.get("/meridians/region/:region/side/:side", getMeridiansByRegionAndSide);
 router.get("/meridians/regions", getMeridianRegion);

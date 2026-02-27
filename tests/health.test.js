@@ -1,4 +1,6 @@
 const request = require('supertest');
+
+jest.mock('../middleware/auth', () => (req, res, next) => next());
 const app = require('../app');
 
 describe('Health route', () => {
