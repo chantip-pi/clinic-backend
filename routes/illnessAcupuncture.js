@@ -8,11 +8,12 @@ const {
 } = require("../controllers/illnessAcupuncture");
 
 const auth = require("../middleware/auth");
+const { illnessAcupunctureValidation } = require('../middleware/validation');
 const router = express.Router();
 
 router.get("/illnessAcupunctures", auth, listIllnessAcupunctures);
 router.get("/illnessAcupunctures/:illnessId", auth, getAcupuncturesByIllnessId);
-router.post("/illnessAcupunctures", auth, addIllnessAcupuncture);
+router.post("/illnessAcupunctures", auth, illnessAcupunctureValidation.create, addIllnessAcupuncture);
 router.delete("/illnessAcupunctures/:illnessId/:acupunctureId", auth, removeIllnessAcupuncture);
 router.delete("/illnessAcupunctures/:illnessId", auth, removeAllAcupuncturesForIllness);
 

@@ -37,7 +37,12 @@ describe('Patient routes', () => {
   it('POST /api/patients should create patient', async () => {
     const res = await request(app)
       .post('/api/patients')
-      .send({ nameSurname: 'Jane Doe' });
+      .send({ 
+        nameSurname: 'Jane Doe',
+        phoneNumber: '1234567890',
+        birthday: '1990-01-01',
+        gender: 'Female'
+      });
     expect(res.status).toBe(201);
     expect(res.body.nameSurname).toBe('Jane Doe');
   });
@@ -45,7 +50,12 @@ describe('Patient routes', () => {
   it('PUT /api/patients/:patientId should update patient', async () => {
     const res = await request(app)
       .put('/api/patients/1')
-      .send({ nameSurname: 'John Updated' });
+      .send({ 
+        nameSurname: 'John Updated',
+        phoneNumber: '1234567890',
+        birthday: '1990-01-01',
+        gender: 'Female'
+      });
     expect(res.status).toBe(200);
     expect(res.body.nameSurname).toBe('John Updated');
   });

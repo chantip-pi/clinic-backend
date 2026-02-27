@@ -3,23 +3,69 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 const path = require('path');
+const fileType = require('file-type');
 
 const router = express.Router();
 
 // Cloudinary is auto-configured from CLOUDINARY_URL env variable
 
+// Allowed file types and their magic numbers
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png', 
+  'image/gif',
+  'image/webp'
+];
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+// Enhanced file validation function
+const validateFileContent = async (buffer, mimetype) => {
+  try {
+    // Verify file type using magic numbers
+    const typeInfo = await fileType.fromBuffer(buffer);
+    
+    if (!typeInfo) {
+      throw new Error('Invalid file format');
+    }
+    
+    // Check if detected MIME type matches allowed types
+    if (!ALLOWED_MIME_TYPES.includes(typeInfo.mime)) {
+      throw new Error(`File type ${typeInfo.mime} not allowed`);
+    }
+    
+    // Check if declared MIME type matches detected type
+    if (mimetype !== typeInfo.mime) {
+      throw new Error('File MIME type mismatch');
+    }
+    
+    return true;
+  } catch (error) {
+    throw new Error(`File validation failed: ${error.message}`);
+  }
+};
+
+// Sanitize filename
+const sanitizeFilename = (filename) => {
+  const ext = path.extname(filename);
+  const name = path.basename(filename, ext);
+    // Remove special characters, keep alphanumeric, dash, underscore
+  const sanitizedName = name.replace(/[^a-zA-Z0-9\-_]/g, '_');
+  return `${sanitizedName}${ext}`;
+};
+
 // Use memory storage — no disk writing
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'), false);
+    // Basic MIME type check first
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      return cb(new Error('Only image files are allowed!'), false);
     }
+    cb(null, true);
   },
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: MAX_FILE_SIZE
   }
 });
 
@@ -88,7 +134,12 @@ router.post('/images', upload.single('image'), async (req, res) => {
   }
 
   try {
-    const result = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+    // Additional content validation
+    await validateFileContent(req.file.buffer, req.file.mimetype);
+    
+    // Sanitize filename
+    const sanitizedName = sanitizeFilename(req.file.originalname);
+    const result = await uploadToCloudinary(req.file.buffer, sanitizedName);
 
     // Reconstruct filename with extension from Cloudinary result
     const parts = result.public_id.split('/');
@@ -114,6 +165,9 @@ router.put('/images/:filename', upload.single('image'), async (req, res) => {
   }
 
   try {
+    // Additional content validation
+    await validateFileContent(req.file.buffer, req.file.mimetype);
+    
     const filename = req.params.filename;
     const publicId = `images/${filename.replace(/\.[^/.]+$/, '')}`;
 

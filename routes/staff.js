@@ -12,6 +12,7 @@ const {
 } = require('../controllers/staff');
 
 const auth = require('../middleware/auth');
+const { staffValidation } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -19,11 +20,11 @@ const router = express.Router();
 router.get('/staff', auth, listStaff);
 router.get('/staff/id/:staffId', auth, getStaffById);
 router.get('/staff/username/:username', auth, getStaffByUsername);
-router.post('/staff/login', loginStaff);
+router.post('/staff/login', staffValidation.login, loginStaff);
 router.get('/staff/doctors', auth, getDoctorName);
 router.get('/staff/staffs', auth, getStaffName);
-router.post('/staff', auth, addStaff);
-router.put('/staff/:staffId', auth, editStaff);
+router.post('/staff', auth, staffValidation.create, addStaff);
+router.put('/staff/:staffId', auth, staffValidation.update, editStaff);
 router.delete('/staff/:staffId', auth, removeStaff);
 
 module.exports = router;

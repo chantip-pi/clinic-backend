@@ -54,7 +54,16 @@ describe('Staff routes', () => {
   it('POST /api/staff should create staff', async () => {
     const res = await request(app)
       .post('/api/staff')
-      .send({ username: 'newuser', password: 'x' });
+      .send({ 
+        username: 'newuser', 
+        password: 'password123',
+        nameSurname: 'Test User',
+        phoneNumber: '1234567890',
+        birthday: '1990-01-01',
+        gender: 'Male',
+        email: 'test@example.com',
+        title: 'Staff'
+      });
     expect(res.status).toBe(201);
     expect(res.body.username).toBe('newuser');
   });
