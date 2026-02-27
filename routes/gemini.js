@@ -5,9 +5,10 @@ const { getMeridians, getUniqueMeridianNames } = require('../models/meridian');
 
 const auth = require("../middleware/auth");
 const { geminiValidation } = require('../middleware/validation');
+const { aiLimiter } = require('../middleware/rateLimiter');
 const router = express.Router();
 
-router.post('/suggest', auth, geminiValidation.suggest, async (req, res, next) => {
+router.post('/suggest', aiLimiter, auth, geminiValidation.suggest, async (req, res, next) => {
   try {
     const { symptoms } = req.body;
     

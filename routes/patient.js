@@ -10,12 +10,13 @@ const {
 
 const auth = require('../middleware/auth');
 const { patientValidation } = require('../middleware/validation');
+const { createLimiter } = require('../middleware/rateLimiter');
 const router = express.Router();
 
 router.get('/patients', auth, listPatients);
 router.get('/patients/appointment/:appointmentDate', auth, getPatientsByAppointmentDate);
 router.get('/patients/:patientId', auth, getPatientById);
-router.post('/patients', auth, patientValidation.create, addPatient);
+router.post('/patients', createLimiter, auth, patientValidation.create, addPatient);
 router.put('/patients/:patientId', auth, patientValidation.update, editPatient);
 router.delete('/patients/:patientId', auth, removePatient);
 

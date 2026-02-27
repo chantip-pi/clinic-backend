@@ -4,6 +4,7 @@ const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 const path = require('path');
 const fileType = require('file-type');
+const { uploadLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
@@ -128,7 +129,7 @@ router.get('/images/:filename', async (req, res) => {
 });
 
 // POST /api/images - Upload new image to Cloudinary
-router.post('/images', upload.single('image'), async (req, res) => {
+router.post('/images', uploadLimiter, upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No image file provided' });
   }
@@ -159,7 +160,7 @@ router.post('/images', upload.single('image'), async (req, res) => {
 });
 
 // PUT /api/images/:filename - Replace existing image on Cloudinary
-router.put('/images/:filename', upload.single('image'), async (req, res) => {
+router.put('/images/:filename', uploadLimiter, upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No image file provided' });
   }

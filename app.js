@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { logger, errorHandler } = require('./middleware');
+const { generalLimiter } = require('./middleware/rateLimiter');
 const routes = require('./routes');
 
 const FRONTEND_URL = process.env.USE_LOCALHOST === 'true' ? process.env.LOCAL_FRONTEND_URL : process.env.PROD_FRONTEND_URL;
@@ -19,6 +20,7 @@ app.use(
 
 app.use(express.json());
 app.use(logger);
+app.use('/api', generalLimiter);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

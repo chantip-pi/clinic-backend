@@ -114,6 +114,38 @@ At a high level:
 - `PUT /api/appointments/:appointmentId` – update appointment.
 - `DELETE /api/appointments/:appointmentId` – remove appointment.
 
+## Security Features
+
+### Rate Limiting
+The API implements comprehensive rate limiting to protect against abuse and DDoS attacks:
+
+- **General Rate Limiting**: 1000 requests per 15 minutes per IP for all API endpoints
+- **Authentication Rate Limiting**: 5 requests per 15 minutes per IP for login endpoints
+- **Upload Rate Limiting**: 20 requests per 15 minutes per IP for file upload endpoints
+- **AI Rate Limiting**: 10 requests per 15 minutes per IP for AI/Gemini endpoints
+- **Create Rate Limiting**: 100 requests per 15 minutes per IP for resource creation endpoints
+
+Rate limiting headers are included in responses:
+- `RateLimit-Limit`: Maximum requests allowed in the time window
+- `RateLimit-Remaining`: Remaining requests in the current window
+- `RateLimit-Reset`: Time when the rate limit window resets
+
+When limits are exceeded, the API returns a `429 Too Many Requests` response with an error message.
+
+### Input Validation
+All API endpoints have comprehensive input validation to prevent:
+- SQL injection attacks
+- XSS attacks
+- Invalid data submissions
+
+### File Upload Security
+File upload endpoints include:
+- Magic number verification to ensure file types match extensions
+- MIME type validation
+- File size limits (5MB)
+- Filename sanitization
+
+
 ## How to add a new entity (example: Appointment)
 
 When you add a new entity, you typically follow this order:
