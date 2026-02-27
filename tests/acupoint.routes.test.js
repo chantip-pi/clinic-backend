@@ -28,7 +28,7 @@ describe('Acupoint routes', () => {
   it('POST /api/acupoints should create acupoint', async () => {
     const res = await request(app)
       .post('/api/acupoints')
-      .send({ acupointName: 'Yun Men', isBilateral: true });
+      .send({ acupointCode: 'LU2', acupointName: 'Yun Men', isBilateral: true });
     expect(res.status).toBe(201);
     expect(res.body.acupointName).toBe('Yun Men');
   });

@@ -39,9 +39,12 @@ describe('Patient routes', () => {
       .post('/api/patients')
       .send({ 
         nameSurname: 'Jane Doe',
-        phoneNumber: '1234567890',
+        phoneNumber: '0123456789',
         birthday: '1990-01-01',
-        gender: 'Female'
+        gender: 'Female',
+        remainingCourses: 1,
+        congenitalDisease: null,
+        surgeryHistory: 'Knee surgery'
       });
     expect(res.status).toBe(201);
     expect(res.body.nameSurname).toBe('Jane Doe');

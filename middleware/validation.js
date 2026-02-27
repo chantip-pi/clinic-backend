@@ -24,7 +24,7 @@ const commonValidations = {
   phoneNumber: body('phoneNumber').isMobilePhone().withMessage('Valid phone number required'),
   name: body('nameSurname').isLength({ min: 2, max: 100 }).trim().escape().withMessage('Name must be 2-100 characters'),
   password: body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  gender: body('gender').isIn(['Male', 'Female']).withMessage('Gender must be Male, Female'),
+  gender: body('gender').isIn(['Male', 'Female']).withMessage('Gender must be Male or Female'),
   title: body('title').isIn(['Doctor', 'Staff', 'Manager']).withMessage('Title must be Doctor, Staff or Manager')
 };
 
@@ -65,18 +65,22 @@ const patientValidation = {
   create: [
     body('nameSurname').isLength({ min: 2, max: 100 }).trim().escape(),
     body('phoneNumber').isMobilePhone(),
-    body('email').optional().isEmail().normalizeEmail(),
     body('birthday').isISO8601().toDate(),
     body('gender').isIn(['Male', 'Female']),
+    body('remainingCourses').isInt({ min: 0 }),
+    body('congenitalDisease').optional().isLength({ max: 2000 }).trim().escape(),
+    body('surgeryHistory').optional().isLength({ max: 2000 }).trim().escape(),
     handleValidationErrors
   ],
   update: [
     commonValidations.patientId,
     body('nameSurname').optional().isLength({ min: 2, max: 100 }).trim().escape(),
     body('phoneNumber').optional().isMobilePhone(),
-    body('email').optional().isEmail().normalizeEmail(),
     body('birthday').optional().isISO8601().toDate(),
     body('gender').optional().isIn(['Male', 'Female']),
+    body('remainingCourses').optional().isInt({ min: 0 }),
+    body('congenitalDisease').optional().isLength({ max: 2000 }).trim().escape(),
+    body('surgeryHistory').optional().isLength({ max: 2000 }).trim().escape(),
     handleValidationErrors
   ]
 };
@@ -85,10 +89,10 @@ const patientValidation = {
 const appointmentValidation = {
   create: [
     body('patientId').isInt({ min: 1 }),
-    body('doctorId').optional().isInt({ min: 1 }),
+    body('doctorId').isInt({ min: 1 }),
     body('appointmentDateTime').isISO8601().toDate(),
-    body('status').optional().isIn(['scheduled', 'completed', 'canceled', 'Scheduled', 'Completed', 'Canceled']),
-    body('remarks').optional().isLength({ max: 2000 }).trim().escape(),
+    body('status').isIn(['scheduled', 'completed', 'canceled', 'Scheduled', 'Completed', 'Canceled']),
+    body('reason').optional().isLength({ max: 2000 }).trim().escape(),
     handleValidationErrors
   ],
   update: [
@@ -97,7 +101,7 @@ const appointmentValidation = {
     body('doctorId').optional().isInt({ min: 1 }),
     body('appointmentDateTime').optional().isISO8601().toDate(),
     body('status').optional().isIn(['scheduled', 'completed', 'canceled', 'Scheduled', 'Completed', 'Canceled', 'Scheduled', 'Completed', 'Canceled']),
-    body('remarks').optional().isLength({ max: 2000 }).trim().escape(),
+    body('reason').optional().isLength({ max: 2000 }).trim().escape(),
     handleValidationErrors
   ]
 };
@@ -109,10 +113,10 @@ const medicalRecordValidation = {
     body('appointmentId').optional().isInt({ min: 1 }),
     body('diagnosis').isLength({ min: 1, max: 2000 }).trim().escape(),
     body('symptoms').isLength({ min: 1, max: 2000 }).trim().escape(),
-    body('prescriptions').optional().isLength({ max: 2000 }).trim().escape(),
-    body('remarks').optional().isLength({ max: 2000 }).trim().escape(),
+    body('prescriptions').isLength({ max: 2000 }).trim().escape(),
+    body('remarks').isLength({ max: 2000 }).trim().escape(),
     body('dateTime').isISO8601().toDate(),
-    body('assignees').optional().isArray(),
+    body('assignees').isArray(),
     handleValidationErrors
   ],
   update: [
@@ -122,6 +126,7 @@ const medicalRecordValidation = {
     body('prescriptions').optional().isLength({ max: 2000 }).trim().escape(),
     body('remarks').optional().isLength({ max: 2000 }).trim().escape(),
     body('dateTime').optional().isISO8601().toDate(),
+    body('assignees').optional().isArray(),
     handleValidationErrors
   ]
 };
@@ -129,13 +134,13 @@ const medicalRecordValidation = {
 // Acupoint validation schemas
 const acupointValidation = {
   create: [
-    body('acupointCode').optional().isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
+    body('acupointCode').isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
     body('acupointName').isLength({ min: 1, max: 100 }).trim().escape(),
     body('isBilateral').isBoolean(),
     handleValidationErrors
   ],
   update: [
-    param('acupointCode').isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
+    param('acupointCode').optional().isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
     body('acupointName').optional().isLength({ min: 1, max: 100 }).trim().escape(),
     body('isBilateral').optional().isBoolean(),
     handleValidationErrors
@@ -160,15 +165,15 @@ const IllnessCategoryEnum = {
 const illnessValidation = {
   create: [
     body('illnessName').isLength({ min: 1, max: 100 }).trim().escape(),
-    body('description').optional().isLength({ max: 2000 }).trim().escape(),
+    body('description').isLength({ max: 2000 }).trim().escape(),
     body('category').isIn(Object.values(IllnessCategoryEnum)).isLength({ max: 50 }).trim().escape(),
     handleValidationErrors
   ],
   update: [
-    param('illnessId').isInt({ min: 1 }),
+    param('illnessId').optional().isInt({ min: 1 }),
     body('illnessName').optional().isLength({ min: 1, max: 100 }).trim().escape(),
     body('description').optional().isLength({ max: 2000 }).trim().escape(),
-    body('category').isIn(Object.values(IllnessCategoryEnum)).isLength({ max: 50 }).trim().escape(),
+    body('category').optional().isIn(Object.values(IllnessCategoryEnum)).isLength({ max: 50 }).trim().escape(),
     handleValidationErrors
   ]
 };
@@ -195,7 +200,7 @@ const medicalRecordAcupunctureValidation = {
   create: [
     param('recordId').isInt({ min: 1 }),
     body('acupunctureId').isInt({ min: 1 }),
-    body('lateralSide').isIn(['LEFT', 'RIGHT', 'BOTH', 'NONE', 'left', 'right', 'both', 'none', 'Left', 'Right', 'Both', 'None']).withMessage('Lateral side must be Left, Right, Both, or None'),
+    body('lateralSide').optional().isIn(['LEFT', 'RIGHT', 'BOTH', 'NONE', 'left', 'right', 'both', 'none', 'Left', 'Right', 'Both', 'None']).withMessage('Lateral side must be Left, Right, Both, or None'),
     handleValidationErrors
   ]
 };
@@ -211,10 +216,10 @@ const acupointLocationValidation = {
   ],
   update: [
     param('locationId').isInt({ min: 1 }),
-    body('meridianId').optional().isInt({ min: 1 }),
-    body('acupointCode').optional().isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
-    body('pointTop').optional().isInt({ min: 0 }),
-    body('pointLeft').optional().isInt({ min: 0 }),
+    body('meridianId').isInt({ min: 1 }),
+    body('acupointCode').isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
+    body('pointTop').isInt({ min: 0 }),
+    body('pointLeft').isInt({ min: 0 }),
     handleValidationErrors
   ]
 };
@@ -223,11 +228,13 @@ const acupointLocationValidation = {
 const acupunctureValidation = {
   create: [
     body('acupunctureCode').isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
+    body('meridianId').isInt({ min: 1 }),
     handleValidationErrors
   ],
   update: [
     param('acupunctureId').isInt({ min: 1 }),
-    body('acupunctureCode').optional().isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
+    body('acupunctureCode').isAlphanumeric().isLength({ min: 1, max: 10 }).trim().toUpperCase(),
+    body('meridianId').isInt({ min: 1 }),
     handleValidationErrors
   ]
 };
@@ -245,13 +252,13 @@ const illnessAcupunctureValidation = {
 const meridianValidation = {
   create: [
     body('meridianName').isLength({ min: 1, max: 100 }).trim().escape(),
-    body('image').optional().isLength({ max: 100 }).trim().escape(),
+    body('image').isLength({ max: 100 }).trim().escape(),
     handleValidationErrors
   ],
   update: [
     param('meridianId').isInt({ min: 1 }),
-    body('meridianName').optional().isLength({ min: 1, max: 100 }).trim().escape(),
-    body('image').optional().isLength({ max: 100 }).trim().escape(),
+    body('meridianName').isLength({ min: 1, max: 100 }).trim().escape(),
+    body('image').isLength({ max: 100 }).trim().escape(),
     handleValidationErrors
   ]
 };
