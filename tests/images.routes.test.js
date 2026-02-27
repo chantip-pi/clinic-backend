@@ -23,6 +23,14 @@ jest.mock('streamifier', () => ({
   })),
 }));
 
+// Mock file-type
+jest.mock('file-type', () => ({
+  fromBuffer: jest.fn().mockResolvedValue({
+    ext: 'png',
+    mime: 'image/png'
+  }),
+}));
+
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 

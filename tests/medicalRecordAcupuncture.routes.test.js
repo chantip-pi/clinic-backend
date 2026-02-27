@@ -4,16 +4,16 @@ jest.mock("../middleware/auth", () => (req, res, next) => next());
 
 jest.mock("../models/medicalRecordAcupuncture", () => ({
   getMedicalRecordAcupunctures: jest.fn().mockResolvedValue([
-    { recordId: 1, acupunctureId: 1, lateralSide: "both" },
-    { recordId: 1, acupunctureId: 2, lateralSide: "both" },
+    { recordId: 1, acupunctureId: 1, lateralSide: "BOTH" },
+    { recordId: 1, acupunctureId: 2, lateralSide: "BOTH" },
   ]),
   getAcupuncturesByRecordId: jest.fn().mockResolvedValue([
-    { recordId: 1, acupunctureId: 1, lateralSide: "both" },
-    { recordId: 1, acupunctureId: 2, lateralSide: "both" },
+    { recordId: 1, acupunctureId: 1, lateralSide: "BOTH" },
+    { recordId: 1, acupunctureId: 2, lateralSide: "BOTH" },
   ]),
   createMedicalRecordAcupuncture: jest
     .fn()
-    .mockResolvedValue({ recordId: 1, acupunctureId: 3, lateralSide: "both" }),
+    .mockResolvedValue({ recordId: 1, acupunctureId: 3, lateralSide: "BOTH" }),
   deleteMedicalRecordAcupuncture: jest.fn().mockResolvedValue(true),
   deleteAllAcupuncturesForRecord: jest.fn().mockResolvedValue(true),
 }));
@@ -36,7 +36,7 @@ describe("Medical Record Acupuncture routes", () => {
   it("POST /api/medicalRecordAcupunctures/:recordId should create medical record acupuncture", async () => {
     const res = await request(app)
       .post("/api/medicalRecordAcupunctures/1")
-      .send({ acupunctureId: 3, lateralSide: "both" });
+      .send({ acupunctureId: 3, lateralSide: "BOTH" });
     expect(res.status).toBe(201);
     expect(res.body.acupunctureId).toBe(3);
   });

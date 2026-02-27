@@ -12,6 +12,7 @@ const {
 } = require("../controllers/meridian");
 
 const auth = require("../middleware/auth");
+const { meridianValidation } = require('../middleware/validation');
 const router = express.Router();
 
 router.get("/meridians", auth, listMeridians);
@@ -20,8 +21,8 @@ router.get("/meridians/meridian/:meridianId", getMeridianById);
 router.get("/meridians/region/:region/side/:side", getMeridiansByRegionAndSide);
 router.get("/meridians/regions", getMeridianRegion);
 router.get("/meridians/regions/:region", getMeridianSidesByRegion);
-router.post("/meridians", addMeridian);
-router.put("/meridians/meridian/:meridianId", editMeridian);
+router.post("/meridians", meridianValidation.create, addMeridian);
+router.put("/meridians/meridian/:meridianId", meridianValidation.update, editMeridian);
 router.delete("/meridians/meridian/:meridianId", removeMeridian);
 
 module.exports = router;

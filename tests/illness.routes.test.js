@@ -31,7 +31,7 @@ describe("Illness routes", () => {
       .send({
         illnessName: "Cold",
         description: "Common Cold",
-        category: "Viral",
+        category: "Infection",
       });
     expect(res.status).toBe(201);
     expect(res.body.illnessName).toBe("Cold");
@@ -43,7 +43,7 @@ describe("Illness routes", () => {
       .send({
         illnessName: "Flu",
         description: "Influenza Updated",
-        category: "Viral",
+        category: "Infection",
       });
     expect(res.status).toBe(200);
     expect(res.body.description).toBe("Influenza Updated");

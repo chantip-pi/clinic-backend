@@ -79,7 +79,7 @@ describe('Appointment routes', () => {
   it('POST /api/appointments should create appointment', async () => {
     const res = await request(app)
       .post('/api/appointments')
-      .send({ patientId: 1, appointmentDateTime: '2025-02-01T10:00:00Z', status: 'scheduled' });
+      .send({ patientId: 1, appointmentDateTime: '2025-02-01T10:00:00Z', status: 'scheduled', reason: 'Test reason' ,doctorId: 1});
     expect(res.status).toBe(201);
     expect(res.body.appointmentId).toBe(2);
   });
