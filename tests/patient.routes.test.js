@@ -42,7 +42,7 @@ describe('Patient routes', () => {
         phoneNumber: '0123456789',
         birthday: '1990-01-01',
         gender: 'Female',
-        remainingCourses: 1,
+        remainingCourse: 1,
         congenitalDisease: null,
         surgeryHistory: 'Knee surgery'
       });
