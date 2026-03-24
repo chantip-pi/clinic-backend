@@ -44,6 +44,7 @@ Return exactly two sections:
 result:
 A concise clinical explanation describing:
 - TCM pattern recognition (reference specific illnesses from context when applicable)
+- Explain why each acupoint is selected and how it addresses the identified pattern
 - Treatment principle how many point should be used, how to apply them for how long
 
 data:
@@ -64,15 +65,18 @@ A JSON array in this format:
 ]
 
 **IMPORTANT NOTES FOR DATA FORMAT:**
-- Include illness_id and illness_name ONLY when the illness exists in the database context
-- Set illness_id and illness_name to null when the illness is not found in the database
+- Include illness_id ONLY when the illness exists in the database context
+- Set illness_id to null when the illness is not found in the database
 - Use exact meridian names from the database context when available
 - Keep the same structure for all entries, even when some fields are null
+- DO NOT include id in result section, return only in data section strictly
+- If illness_name does not exist in the database, set only the illness_name field
+- Sort data by illness_name in ascending order
 
 **CRITICAL**: If the context contains relevant illnesses with recommendations, you MUST use them.
 Keep explanations professional, clear, and brief.
 Use bold headers for the bullet points.
-also state where the information was sourced from percisely.
+Also state where the information was sourced from precisely.
 `;
 
 module.exports = { SYSTEM_PROMPT };
