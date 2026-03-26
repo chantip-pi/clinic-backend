@@ -49,7 +49,15 @@ function isError(err) {
 /**
  * Main execution function
  */
-async function execute(symptoms, dbContext = null) {
+async function execute(symptoms, dbContext = null, imageData = null) {
+  // Validate image file size (7MB limit)
+  if (imageData && imageData.buffer) {
+    const MAX_FILE_SIZE = 7 * 1024 * 1024; // 7MB
+    if (imageData.buffer.length > MAX_FILE_SIZE) {
+      throw new Error('Image file size exceeds 7MB limit');
+    }
+  }
+
   // Build context string from database
   let contextString = '';
   if (dbContext) {
@@ -76,16 +84,30 @@ async function execute(symptoms, dbContext = null) {
     contextString += '\n=== END DATABASE CONTEXT ===\n';
   }
 
-  // 2️⃣ Build Gemini request
+  // Build parts array for Gemini request
+  const parts = [];
+  
+  // Add text part with symptoms and context
+  parts.push({
+    text: `${SYSTEM_PROMPT}${contextString}\nUSER SYMPTOMS: ${symptoms}`
+  });
+  
+  // Add image part if provided
+  if (imageData && imageData.buffer && imageData.mimetype) {
+    parts.push({
+      inlineData: {
+        mimeType: imageData.mimetype,
+        data: imageData.buffer.toString('base64')
+      }
+    });
+  }
+
+  // Build Gemini request
   const request = {
     contents: [
       {
         role: 'user',
-        parts: [
-          {
-            text: `${SYSTEM_PROMPT}${contextString}\nUSER SYMPTOMS: ${symptoms}`
-          }
-        ]
+        parts: parts
       }
     ]
   };

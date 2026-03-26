@@ -180,7 +180,7 @@ const illnessValidation = {
 // Gemini AI validation schemas
 const geminiValidation = {
   suggest: [
-    body('symptoms').isLength({ min: 1, max: 2000 }).trim().escape(),
+    body('symptoms').optional({ nullable: true }).isLength({ min: 1, max: 2000 }).trim().escape(),
     handleValidationErrors
   ]
 };
